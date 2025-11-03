@@ -5,4 +5,25 @@ h1 {
 body {
     height: 100vh;
     margin: 0px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+nav {
+    background-color: blue;
+}
+
+.container {
+    background-color: pink;
+    display: grid;
+    grid-template-columns: 20%, 80%;
+}
+
+aside{
+    background-color: purple;
+}
+
+main{
+    background-color: green;
 }

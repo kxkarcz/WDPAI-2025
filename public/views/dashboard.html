@@ -1,14 +1,45 @@
+<?php
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
     <link rel="stylesheet" type="text/css" href="public/styles/main.css">
-    <link rel="stylesheet" type="text/css" href="public/styles/dashboard.css">
     <script src="public/scripts/main.js" defer></script>
-    <title>Dashboard</title>
 </head>
+
 <body>
-    <h1>Dashboard</h1>
+    <nav>
+        <p>LOGO</p>
+        <ul>
+            <li>DASHBOARD</li>
+            <li>USERS</li>
+            <li>REPORTS</li>
+        </ul>
+    </nav>
+    <div class="container">
+        <aside>
+            <p>PODRECZNE MENU</p>
+        </aside>
+        <main>
+            <h1>CARDS</h1>
+            <!-- TODO display list of cards -->
+             <ul>
+             <?php foreach($cards as $key=>$value): ?> 
+             <li>
+                <?php echo $value['title']; ?>
+            <img src="<?= $value['imageUrlPath']; ?>">
+            </li> 
+             <?php endforeach; ?> 
+             </ul>
+        </main>
+    </div>
+
 </body>
+
 </html>
