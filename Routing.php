@@ -51,6 +51,6 @@ public static function run(string $path) {
             return;
         }
 
-        include 'public/views/404.php';
+        include 'public/views/404.html';
     }
 }

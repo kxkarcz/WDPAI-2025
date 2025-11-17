@@ -10,6 +10,9 @@ body {
     flex-direction: column;
 }
 
+.messages {
+    color: red;
+}
 nav {
     background-color: blue;
 }
