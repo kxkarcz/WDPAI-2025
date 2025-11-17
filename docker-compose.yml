@@ -1,50 +1,63 @@
-version: '3'
+version: '3.9'
 
 services:
-  web:
+  nginx:
     build:
       context: .
       dockerfile: docker/nginx/Dockerfile
     ports:
       - "8080:80"
     volumes:
-      - .:/app/
-    links:
+      - .:/app
+    depends_on:
       - php
     networks:
-      - pg-network
-  
-  db:
-    build:
-      context: .
-      dockerfile: docker/db/Dockerfile
-    ports:
-      - "5433:5432"
-    networks:
-      - pg-network
-  
+      - mindgarden-network
+
   php:
     build:
       context: .
       dockerfile: docker/php/Dockerfile
     volumes:
       - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
     networks:
-      - pg-network
-  
-  pgadmin-wdpai:
+      - mindgarden-network
+
+  db:
+    build:
+      context: .
+      dockerfile: docker/db/Dockerfile
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-db}
+      POSTGRES_USER: ${POSTGRES_USER:-docker}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docker}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    networks:
+      - mindgarden-network
+
+  pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: pg-admin2
+    container_name: mindgarden-pgadmin1
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
+    depends_on:
+      - db
     networks:
-      - pg-network
-  
+      - mindgarden-network
+
 networks:
-  pg-network:
+  mindgarden-network:
+    driver: bridge
 
 volumes:
   pg-data:
