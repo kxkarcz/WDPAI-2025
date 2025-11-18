@@ -278,6 +278,82 @@ AFTER INSERT ON habit_logs
 FOR EACH ROW
 EXECUTE FUNCTION award_streak_badge();
 
+CREATE OR REPLACE FUNCTION award_welcome_badge()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO badges (patient_id, code, label, description)
+    VALUES (NEW.id, 'welcome', 'Pierwszy krok', 'Witamy w MindGarden! Otrzymujesz odznakę powitalną.')
+    ON CONFLICT (patient_id, code) DO NOTHING;
+
+    RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS tg_award_welcome ON patients;
+CREATE TRIGGER tg_award_welcome
+AFTER INSERT ON patients
+FOR EACH ROW
+EXECUTE FUNCTION award_welcome_badge();
+
+CREATE OR REPLACE FUNCTION award_first_mood_badge()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    existing_count INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO existing_count FROM moods WHERE patient_id = NEW.patient_id;
+    IF existing_count = 1 THEN
+        INSERT INTO badges (patient_id, code, label, description)
+        VALUES (NEW.patient_id, 'first_mood', 'Pierwszy wpis nastroju', 'Dziękujemy za pierwszy wpis nastroju!')
+        ON CONFLICT (patient_id, code) DO NOTHING;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS tg_award_first_mood ON moods;
+CREATE TRIGGER tg_award_first_mood
+AFTER INSERT ON moods
+FOR EACH ROW
+EXECUTE FUNCTION award_first_mood_badge();
+
+CREATE OR REPLACE FUNCTION award_habit_goal_badge()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    p_id INTEGER;
+    freq_goal INTEGER;
+    completed_count INTEGER;
+    code_text TEXT;
+BEGIN
+    SELECT h.patient_id, h.frequency_goal INTO p_id, freq_goal FROM habits h WHERE h.id = NEW.habit_id;
+    IF p_id IS NULL THEN
+        RETURN NEW;
+    END IF;
+
+    SELECT COUNT(*) INTO completed_count FROM habit_logs hl WHERE hl.habit_id = NEW.habit_id AND hl.completed = TRUE;
+
+    IF freq_goal IS NOT NULL AND completed_count >= freq_goal THEN
+        code_text := 'habit_goal_' || NEW.habit_id;
+        INSERT INTO badges (patient_id, code, label, description)
+        VALUES (p_id, code_text, 'Cel nawyku osiągnięty', 'Osiągnąłeś cel dla tego nawyku!')
+        ON CONFLICT (patient_id, code) DO NOTHING;
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS tg_award_habit_goal ON habit_logs;
+CREATE TRIGGER tg_award_habit_goal
+AFTER INSERT ON habit_logs
+FOR EACH ROW
+EXECUTE FUNCTION award_habit_goal_badge();
+
 
 INSERT INTO emotion_categories (slug, name, accent_color) VALUES
 ('joy', 'Radość', '#2a9d8f'),
@@ -450,6 +526,7 @@ VALUES
     (SELECT id FROM users WHERE email = 'psy1@mindgarden.local'),
     'Dzięki za wiadomość. Przypomnij proszę ćwiczenie oddechu z ostatniej sesji.'
 );
+
 
 DO $$
 BEGIN
