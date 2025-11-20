@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pl" data-theme="<!--__THEME__*/">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><!--__APP_NAME__*/</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="/styles/dashboard.css">
+    <!--__STYLES__-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="app-header">
+        <div class="app-header__brand">
+            <img src="/assets/logo-leaf.svg" alt="MindGarden" class="app-header__logo">
+            <span class="app-header__title"><!--__APP_NAME__*/</span>
+        </div>
+        <!--__NAV__-->
+        <div class="app-header__actions">
+            <button class="theme-toggle" data-theme-toggle aria-label="Przełącz motyw">
+                <span class="theme-toggle__icon theme-toggle__icon--sun">☀️</span>
+                <span class="theme-toggle__icon theme-toggle__icon--moon">🌙</span>
+            </button>
+            <!--__USER_HEADER__-->
+        </div>
+    </header>
+
+    <main class="app-main">
+        <!--__CONTENT__-->
+    </main>
+
+    <footer class="app-footer">
+        <p>&copy; <!--__YEAR__*/ <!--__APP_NAME__*/. Dbaj o siebie każdego dnia.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" crossorigin="anonymous"></script>
+    <script src="/scripts/theme-toggle.js"></script>
+    <script src="/scripts/main.js"></script>
+    <!--__SCRIPTS__-->
+</body>
+</html>

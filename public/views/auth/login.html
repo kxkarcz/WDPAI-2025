@@ -1,0 +1,25 @@
+<section class="auth-card">
+    <header class="auth-card__header">
+        <img src="/assets/logo-leaf.svg" alt="MindGarden" class="auth-card__logo">
+        <h1><?= htmlspecialchars(Env::get('APP_NAME', 'MindGarden')) ?></h1>
+        <p>Dbaj o swoje zdrowie psychiczne poprzez mikronawyki.</p>
+    </header>
+
+    <?= $errorHtml ?? '' ?>
+    <?= $successHtml ?? '' ?>
+
+    <form method="post" action="/login" class="auth-form">
+        <label class="form-field">
+            <span>E-mail</span>
+            <input type="email" name="email" placeholder="imię.nazwisko@example.com" required autocomplete="email">
+        </label>
+        <label class="form-field">
+            <span>Hasło</span>
+            <input type="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+        </label>
+        <button type="submit" class="button button--primary button--full">Zaloguj się</button>
+    </form>
+    <footer class="auth-card__footer">
+        <p>Nie masz konta? <a href="/register" class="auth-link--highlight">Zarejestruj się</a> z kodem terapeuty</p>
+    </footer>
+</section>

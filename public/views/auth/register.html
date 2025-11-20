@@ -1,0 +1,68 @@
+<section class="auth-card">
+    <header class="auth-card__header">
+        <img src="/assets/logo-leaf.svg" alt="MindGarden" class="auth-card__logo">
+        <h1><?= htmlspecialchars(Env::get('APP_NAME', 'MindGarden')) ?></h1>
+        <p>Dołącz do swojego terapeuty poprzez kod MindGarden.</p>
+    </header>
+
+    <?= $errorHtml ?? '' ?>
+
+    <form method="post" action="/register" class="auth-form">
+        <div class="auth-form__info-badge">
+            <span class="info-badge__icon">👤</span>
+            <div>
+                <strong>Rejestracja jako pacjent</strong>
+                <p>Potrzebujesz kodu od swojego terapeuty, aby dołączyć do MindGarden.</p>
+            </div>
+        </div>
+        <label class="form-field">
+            <span>Kod terapeuty</span>
+            <input type="text"
+                   name="therapist_code"
+                   value="<?= htmlspecialchars($prefillCode ?? '') ?>"
+                   placeholder="np. DGSKY2"
+                   required
+                   maxlength="16"
+                   autocomplete="off">
+        </label>
+        <label class="form-field">
+            <span>Imię i nazwisko</span>
+            <input type="text"
+                   name="full_name"
+                   value="<?= htmlspecialchars($old['full_name'] ?? '') ?>"
+                   placeholder="np. Klaudia Mindful"
+                   required
+                   autocomplete="name">
+        </label>
+        <label class="form-field">
+            <span>E-mail</span>
+            <input type="email"
+                   name="email"
+                   value="<?= htmlspecialchars($old['email'] ?? '') ?>"
+                   placeholder="imię.nazwisko@example.com"
+                   required
+                   autocomplete="email">
+        </label>
+        <label class="form-field">
+            <span>Hasło</span>
+            <input type="password"
+                   name="password"
+                   placeholder="••••••••"
+                   minlength="6"
+                   required
+                   autocomplete="new-password">
+        </label>
+        <label class="form-field">
+            <span>Cel pracy / obszar</span>
+            <input type="text"
+                   name="focus_area"
+                   value="<?= htmlspecialchars($old['focus_area'] ?? '') ?>"
+                   placeholder="np. redukcja stresu">
+        </label>
+        <button type="submit" class="button button--primary button--full">Utwórz konto MindGarden</button>
+    </form>
+
+    <footer class="auth-card__footer">
+        <p>Masz już konto? <a href="/login">Zaloguj się</a></p>
+    </footer>
+</section>
