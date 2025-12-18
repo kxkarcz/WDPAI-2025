@@ -9,6 +9,7 @@
     <?= $successHtml ?? '' ?>
 
     <form method="post" action="/login" class="auth-form">
+        <?= $csrfField ?? '' ?>
         <label class="form-field">
             <span>E-mail</span>
             <input type="email" name="email" placeholder="imię.nazwisko@example.com" required autocomplete="email">
