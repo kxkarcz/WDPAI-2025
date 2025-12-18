@@ -202,28 +202,35 @@ RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    current_streak INTEGER;
+    current_streak INTEGER := 0;
+    check_date DATE := CURRENT_DATE;
+    has_entry BOOLEAN;
 BEGIN
-    WITH completed_logs AS (
-        SELECT DISTINCT hl.log_date::date AS log_date
-        FROM habit_logs hl
-        JOIN habits h ON h.id = hl.habit_id
-        WHERE h.patient_id = p_patient_id
-          AND hl.completed = TRUE
-    ),
-    streaks AS (
-        SELECT log_date,
-               log_date - (ROW_NUMBER() OVER (ORDER BY log_date)) * INTERVAL '1 day' AS grp
-        FROM completed_logs
-    )
-    SELECT COALESCE(MAX(counted), 0)
-    INTO current_streak
-    FROM (
-        SELECT COUNT(*) AS counted
-        FROM streaks
-        GROUP BY grp
-    ) grouped;
-
+    LOOP
+        SELECT EXISTS (
+            SELECT 1
+            FROM habit_logs hl
+            JOIN habits h ON h.id = hl.habit_id
+            WHERE h.patient_id = p_patient_id
+              AND hl.completed = TRUE
+              AND hl.log_date = check_date
+        ) INTO has_entry;
+        
+        IF has_entry THEN
+            current_streak := current_streak + 1;
+            check_date := check_date - INTERVAL '1 day';
+        ELSE
+            IF check_date = CURRENT_DATE THEN
+                check_date := check_date - INTERVAL '1 day';
+            ELSE
+                EXIT;
+            END IF;
+        END IF;
+        IF current_streak > 365 THEN
+            EXIT;
+        END IF;
+    END LOOP;
+    
     RETURN current_streak;
 END;
 $$;
