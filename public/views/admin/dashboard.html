@@ -1,0 +1,132 @@
+<section class="dashboard-grid dashboard-grid--two">
+    <section class="card">
+        <header class="card__header">
+            <h2>Zarządzanie kontami</h2>
+        </header>
+
+        <?= $successHtml ?? '' ?>
+        <?= $errorHtml ?? '' ?>
+
+        <form class="form-grid" method="post" action="/admin/users" id="admin-create-user">
+            <label class="form-field">
+                <span>Imię i nazwisko</span>
+                <input type="text" name="full_name" required>
+            </label>
+            <label class="form-field">
+                <span>Email</span>
+                <input type="email" name="email" required>
+            </label>
+            <label class="form-field">
+                <span>Hasło</span>
+                <input type="password" name="password" minlength="6" required>
+            </label>
+            <label class="form-field">
+                <span>Rola</span>
+                <select name="role" id="role-select" required>
+                    <option value="patient">Pacjent</option>
+                    <option value="psychologist">Psycholog</option>
+                    <option value="administrator">Administrator</option>
+                </select>
+            </label>
+            <fieldset class="form-field form-field--wide role-fields" data-role="patient">
+                <legend>Dane pacjenta</legend>
+                <label>
+                    <span>Obszar pracy</span>
+                    <input type="text" name="focus_area" placeholder="np. redukcja stresu">
+                </label>
+                <label>
+                    <span>Psycholog prowadzący</span>
+                    <select name="primary_psychologist_id">
+                        <?= $psychologistsOptionsHtml ?? '' ?>
+                    </select>
+                </label>
+            </fieldset>
+
+            <fieldset class="form-field form-field--wide role-fields is-hidden" data-role="psychologist">
+                <legend>Dane psychologa</legend>
+                <label>
+                    <span>Numer licencji</span>
+                    <input type="text" name="license_number" placeholder="np. PTP-12345">
+                </label>
+                <label>
+                    <span>Specjalizacja</span>
+                    <input type="text" name="specialization" placeholder="np. terapia poznawczo-behawioralna">
+                </label>
+            </fieldset>
+
+            <label class="form-field form-field--wide">
+                <span>Status konta</span>
+                <select name="status">
+                    <option value="active">Aktywne</option>
+                    <option value="inactive">Nieaktywne</option>
+                </select>
+            </label>
+
+            <button type="submit" class="button button--primary form-grid__full">Utwórz konto</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <header class="card__header">
+            <h2>Przypisz pacjenta</h2>
+        </header>
+        <form class="form-grid" method="post" action="/admin/assignments">
+            <label class="form-field">
+                <span>Pacjent</span>
+                <select name="patient_user_id" required>
+                    <?= $patientsOptionsHtml ?? '' ?>
+                </select>
+            </label>
+            <label class="form-field">
+                <span>Psycholog</span>
+                <select name="psychologist_user_id" required>
+                    <?= $psychologistsOptionsHtml ?? '' ?>
+                </select>
+            </label>
+            <button type="submit" class="button button--secondary form-grid__full">Przypisz</button>
+        </form>
+    </section>
+
+    <section class="card card--full">
+        <header class="card__header">
+            <h2>Lista użytkowników</h2>
+        </header>
+        
+        <div class="user-filters">
+            <div class="user-filters__search">
+                <input type="text" id="user-search" class="user-filters__input" placeholder="Szukaj po imieniu, nazwisku lub email...">
+            </div>
+            <div class="user-filters__selects">
+                <select id="filter-role" class="user-filters__select">
+                    <option value="">Wszystkie role</option>
+                    <option value="patient">Pacjent</option>
+                    <option value="psychologist">Psycholog</option>
+                    <option value="administrator">Administrator</option>
+                </select>
+                <select id="filter-status" class="user-filters__select">
+                    <option value="">Wszystkie statusy</option>
+                    <option value="active">Aktywne</option>
+                    <option value="inactive">Nieaktywne</option>
+                </select>
+            </div>
+            <div class="user-filters__info">
+                <span id="filter-results"></span>
+            </div>
+        </div>
+        
+        <table class="data-table" id="users-table">
+            <thead>
+                <tr>
+                    <th>Użytkownik</th>
+                    <th>Rola</th>
+                    <th>Status</th>
+                    <th>Utworzono</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?= $usersTableHtml ?? '' ?>
+            </tbody>
+        </table>
+    </section>
+</section>

@@ -1,0 +1,71 @@
+<section class="dashboard-grid dashboard-grid--patient">
+    <section class="card card--tree">
+        <header class="card__header">
+            <h2>Twój MindGarden</h2>
+            <p>Pielęgnuj drzewo codziennymi mikronawykami i świadomymi emocjami.</p>
+        </header>
+        <div class="tree-visual">
+            <img src="/assets/tree-stage-<?= (int) ($snapshot['tree_stage'] ?? 1) ?>.svg" alt="Etap wzrostu drzewka" id="tree-stage-image">
+            <div class="tree-visual__message" id="tree-stage-message">
+                <?= isset($snapshot['average_mood']) && (float) $snapshot['average_mood'] >= 4
+                    ? 'Pięknie! Twoje drzewko kwitnie dzięki regularności.'
+                    : 'Dodaj wpis, aby MindGarden nabrało kolorów.' ?>
+            </div>
+        </div>
+        <dl class="tree-stats">
+            <div>
+                <dt>Ostatni wpis</dt>
+                <dd><?= isset($snapshot['last_entry_date']) ? (new DateTimeImmutable($snapshot['last_entry_date']))->format('d.m.Y') : 'brak' ?></dd>
+            </div>
+            <div>
+                <dt>Średni nastrój</dt>
+                <dd><?= $snapshot['average_mood'] ?? '0.0' ?></dd>
+            </div>
+            <div>
+                <dt>Intensywność emocji</dt>
+                <dd><?= $snapshot['average_intensity'] ?? '0.0' ?>/10</dd>
+            </div>
+            <div>
+                <dt>Aktywne nawyki</dt>
+                <dd><?= $snapshot['active_habits'] ?? 0 ?></dd>
+            </div>
+            <div>
+                <dt>Ukończone nawyki</dt>
+                <dd><?= $snapshot['completed_habits'] ?? 0 ?></dd>
+            </div>
+            <div>
+                <dt>Odznaki</dt>
+                <dd><?= $snapshot['total_badges'] ?? 0 ?></dd>
+            </div>
+            <div>
+                <dt>🔥 Streak</dt>
+                <dd><?= $snapshot['current_streak'] ?? 0 ?> dni</dd>
+            </div>
+        </dl>
+        <footer class="card__footer">
+            <a class="button button--ghost" href="/patient/export">Eksportuj emocje CSV</a>
+        </footer>
+    </section>
+
+    <section class="card card--badges">
+        <header class="card__header">
+            <h2>Twoje odznaki</h2>
+            <p>Zdobywaj regularnie odznaki za swoją konsekwencję.</p>
+        </header>
+        <div class="badge-grid" id="badge-grid">
+            <?= $badgesHtml ?? '' ?>
+        </div>
+    </section>
+
+    <section class="card card--quick-actions">
+        <header class="card__header">
+            <h2>Szybkie akcje</h2>
+        </header>
+        <div class="quick-actions">
+            <a href="/patient/emotions" class="button button--primary">Dodaj wpis emocji</a>
+            <a href="/patient/habits" class="button button--secondary">Zarządzaj nawykami</a>
+            <a href="/patient/history" class="button button--ghost">Zobacz historię</a>
+            <a href="/patient/chat" class="button button--ghost">Chat z terapeutą</a>
+        </div>
+    </section>
+</section>

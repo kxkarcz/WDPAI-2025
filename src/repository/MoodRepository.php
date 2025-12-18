@@ -92,30 +92,11 @@ final class MoodRepository
 
     public function timeline(int $patientId, int $limit = 14): array
     {
-        $sql = <<<SQL
-            SELECT m.id,
-                   m.patient_id,
-                   m.mood_date,
-                   m.mood_level,
-                   m.intensity,
-                   ec.slug   AS category_slug,
-                   ec.name   AS category_name,
-                   es.slug   AS subcategory_slug,
-                   es.name   AS subcategory_name,
-                   m.note
-            FROM moods m
-            JOIN emotion_categories ec ON ec.id = m.emotion_category_id
-            LEFT JOIN emotion_subcategories es ON es.id = m.emotion_subcategory_id
-            WHERE m.patient_id = :patient_id
-            ORDER BY m.mood_date DESC, m.created_at DESC
-            LIMIT :limit
-        SQL;
-
+        $sql = 'SELECT * FROM v_patient_emotion_timeline WHERE patient_id = :patient_id ORDER BY mood_date DESC, created_at DESC LIMIT :limit';
         $statement = $this->db->prepare($sql);
         $statement->bindValue('patient_id', $patientId, PDO::PARAM_INT);
         $statement->bindValue('limit', $limit, PDO::PARAM_INT);
         $statement->execute();
-
         return array_map(fn (array $row): MoodEntry => $this->mapMood($row), $statement->fetchAll());
     }
 

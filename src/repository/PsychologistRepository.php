@@ -16,67 +16,11 @@ final class PsychologistRepository
 
     public function assignedPatients(int $psychologistUserId): array
     {
-        $sql = <<<SQL
-            SELECT pa.id             AS patient_id,
-                   u.id              AS patient_user_id,
-                   u.full_name,
-                   u.email,
-                   pa.focus_area,
-                   pa.tree_stage,
-                   mood_stats.avg_level,
-                   mood_stats.avg_intensity,
-                   last_emotion.category_name  AS last_emotion_category,
-                   last_emotion.subcategory_name AS last_emotion_subcategory,
-                   habit_stats.weekly_completion
-            FROM patient_psychologist pp
-            JOIN psychologists psy ON pp.psychologist_id = psy.id
-            JOIN patients pa ON pa.id = pp.patient_id
-            JOIN users u ON u.id = pa.user_id
-            LEFT JOIN (
-                SELECT patient_id,
-                       ROUND(AVG(mood_level)::numeric, 2)   AS avg_level,
-                       ROUND(AVG(intensity)::numeric, 2)    AS avg_intensity
-                FROM moods
-                GROUP BY patient_id
-            ) mood_stats ON mood_stats.patient_id = pa.id
-            LEFT JOIN LATERAL (
-                SELECT ec.name  AS category_name,
-                       es.name  AS subcategory_name
-                FROM moods m
-                JOIN emotion_categories ec ON ec.id = m.emotion_category_id
-                LEFT JOIN emotion_subcategories es ON es.id = m.emotion_subcategory_id
-                WHERE m.patient_id = pa.id
-                ORDER BY m.mood_date DESC, m.created_at DESC
-                LIMIT 1
-            ) last_emotion ON TRUE
-            LEFT JOIN (
-                SELECT h.patient_id,
-                       ROUND(
-                           AVG(CASE WHEN hl.completed THEN 1 ELSE 0 END)::numeric * 100, 0
-                       ) AS weekly_completion
-                FROM habits h
-                LEFT JOIN habit_logs hl ON hl.habit_id = h.id
-                    AND hl.log_date >= CURRENT_DATE - INTERVAL '7 days'
-                GROUP BY h.patient_id
-            ) habit_stats ON habit_stats.patient_id = pa.id
-            WHERE psy.user_id = :psychologist_user_id
-            GROUP BY pa.id,
-                     pa.focus_area,
-                     pa.tree_stage,
-                     u.id,
-                     u.full_name,
-                     u.email,
-                     mood_stats.avg_level,
-                     mood_stats.avg_intensity,
-                     last_emotion.category_name,
-                     last_emotion.subcategory_name,
-                     habit_stats.weekly_completion
-            ORDER BY u.full_name
-        SQL;
-
+        $sql = 'SELECT * FROM v_psychologist_patient_overview WHERE psychologist_id = (
+            SELECT id FROM psychologists WHERE user_id = :user_id
+        )';
         $statement = $this->db->prepare($sql);
-        $statement->execute(['psychologist_user_id' => $psychologistUserId]);
-
+        $statement->execute(['user_id' => $psychologistUserId]);
         return $statement->fetchAll() ?: [];
     }
 

@@ -1,0 +1,29 @@
+<section class="dashboard-grid dashboard-grid--psychologist"
+         data-user-id="<?= (int) $user->getId() ?>"
+         data-patients='<?= htmlspecialchars($patientsJson ?? '[]', ENT_QUOTES) ?>'>
+
+    <?= $successHtml ?? '' ?>
+    <?= $errorHtml ?? '' ?>
+
+    <section class="card card--patients">
+        <header class="card__header">
+            <h2>Twoi pacjenci</h2>
+            <p>Monitoruj nastroje, rozmawiaj w czacie i wspieraj rozwój.</p>
+        </header>
+        <ul class="patient-table" id="patient-table">
+            <?= $patientsListHtml ?? '' ?>
+        </ul>
+    </section>
+
+    <section class="card card--quick-actions">
+        <header class="card__header">
+            <h2>Szybkie akcje</h2>
+        </header>
+        <div class="quick-actions">
+            <a href="/psychologist/analysis" class="button button--primary">Analiza emocji</a>
+            <a href="/psychologist/chat" class="button button--secondary">Chat terapeutyczny</a>
+            <a href="/psychologist/settings" class="button button--ghost">Ustawienia</a>
+        </div>
+    </section>
+
+</section>

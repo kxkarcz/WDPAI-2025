@@ -56,53 +56,21 @@ final class PatientRepository
         ]);
     }
 
+
     public function dashboardSnapshot(int $patientId): array
     {
-        $sql = <<<SQL
-            SELECT
-                p.tree_stage,
-                COALESCE(mood_stats.total_entries, 0)                  AS total_moods,
-                COALESCE(mood_stats.avg_level, 0)                      AS average_mood,
-                COALESCE(mood_stats.avg_intensity, 0)                  AS average_intensity,
-                mood_stats.last_entry_date,
-                COALESCE(habit_stats.completed_habits, 0)              AS completed_habits,
-                COALESCE(habit_stats.active_habits, 0)                 AS active_habits,
-                COALESCE(badge_stats.total_badges, 0)                  AS total_badges
-            FROM patients p
-            LEFT JOIN (
-                SELECT patient_id,
-                       COUNT(*)                              AS total_entries,
-                       ROUND(AVG(mood_level)::numeric, 2)    AS avg_level,
-                       ROUND(AVG(intensity)::numeric, 2)     AS avg_intensity,
-                       MAX(mood_date)                        AS last_entry_date
-                FROM moods
-                WHERE patient_id = :patient_id
-                GROUP BY patient_id
-            ) mood_stats ON mood_stats.patient_id = p.id
-            LEFT JOIN (
-                SELECT h.patient_id,
-                       COUNT(DISTINCT h.id) AS active_habits,
-                       SUM(CASE WHEN hl.completed THEN 1 ELSE 0 END) AS completed_habits
-                FROM habits h
-                LEFT JOIN habit_logs hl ON hl.habit_id = h.id
-                    AND hl.log_date >= CURRENT_DATE - INTERVAL '7 days'
-                WHERE h.patient_id = :patient_id
-                GROUP BY h.patient_id
-            ) habit_stats ON habit_stats.patient_id = p.id
-            LEFT JOIN (
-                SELECT patient_id,
-                       COUNT(*) AS total_badges
-                FROM badges
-                WHERE patient_id = :patient_id
-                GROUP BY patient_id
-            ) badge_stats ON badge_stats.patient_id = p.id
-            WHERE p.id = :patient_id
-        SQL;
-
+        $sql = 'SELECT * FROM v_patient_mood_summary WHERE patient_id = :patient_id';
         $statement = $this->db->prepare($sql);
         $statement->execute(['patient_id' => $patientId]);
+        $summary = $statement->fetch() ?: [];
 
-        return $statement->fetch() ?: [];
+        $streakSql = 'SELECT calculate_patient_streak(:patient_id) AS current_streak';
+        $streakStmt = $this->db->prepare($streakSql);
+        $streakStmt->execute(['patient_id' => $patientId]);
+        $streak = $streakStmt->fetchColumn();
+
+        $summary['current_streak'] = (int)$streak;
+        return $summary;
     }
 
 
