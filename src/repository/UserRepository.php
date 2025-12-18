@@ -92,6 +92,7 @@ final class UserRepository
 
     public function createUser(array $payload): User
     {
+        $this->db->exec('SET TRANSACTION ISOLATION LEVEL SERIALIZABLE');
         $this->db->beginTransaction();
 
         try {

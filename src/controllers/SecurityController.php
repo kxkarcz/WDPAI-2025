@@ -27,6 +27,7 @@ final class SecurityController extends AppController
         $this->render('auth/login', [
             'errorHtml' => $errorHtml,
             'successHtml' => $successHtml,
+            'csrfField' => $this->csrfField(),
         ], 'auth/layout');
     }
 
@@ -49,11 +50,26 @@ final class SecurityController extends AppController
             'old' => $old,
             'oldJson' => $oldJson,
             'prefillCode' => $code,
+            'csrfField' => $this->csrfField(),
         ], 'auth/layout');
     }
 
+    private const MAX_LOGIN_ATTEMPTS = 5;
+    private const LOCKOUT_TIME = 900; // 15 minutes in seconds
+
     public function login(): void
     {
+        $this->requireCsrf();
+
+        $attempts = $_SESSION['login_attempts'] ?? 0;
+        $lockoutUntil = $_SESSION['login_lockout'] ?? 0;
+
+        if ($lockoutUntil > time()) {
+            $remainingMinutes = ceil(($lockoutUntil - time()) / 60);
+            $this->setFlash('auth_error', "Zbyt wiele nieudanych prób. Spróbuj ponownie za {$remainingMinutes} min.");
+            $this->redirect('/login');
+        }
+
         $email = strtolower(trim($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
 
@@ -63,21 +79,39 @@ final class SecurityController extends AppController
         }
 
         if (!$this->auth->attempt($email, $password)) {
-            $this->setFlash('auth_error', 'Nieprawidłowe dane logowania.');
+            $_SESSION['login_attempts'] = $attempts + 1;
+
+            if ($_SESSION['login_attempts'] >= self::MAX_LOGIN_ATTEMPTS) {
+                $_SESSION['login_lockout'] = time() + self::LOCKOUT_TIME;
+                $_SESSION['login_attempts'] = 0;
+                $this->setFlash('auth_error', 'Zbyt wiele nieudanych prób. Konto zablokowane na 15 minut.');
+            } else {
+                $remaining = self::MAX_LOGIN_ATTEMPTS - $_SESSION['login_attempts'];
+                $this->setFlash('auth_error', "Nieprawidłowe dane logowania. Pozostało prób: {$remaining}.");
+            }
             $this->redirect('/login');
         }
+
+        unset($_SESSION['login_attempts'], $_SESSION['login_lockout']);
 
         $this->redirect('/dashboard');
     }
 
     public function register(): void
     {
+        $this->requireCsrf();
+
         $fullName = trim($_POST['full_name'] ?? '');
         $emailRaw = trim($_POST['email'] ?? '');
         $email = filter_var($emailRaw, FILTER_VALIDATE_EMAIL);
         $password = $_POST['password'] ?? '';
         $focusArea = trim($_POST['focus_area'] ?? '');
         $therapistCode = strtoupper(trim($_POST['therapist_code'] ?? ''));
+
+        $fullName = mb_substr($fullName, 0, 100);
+        $emailRaw = mb_substr($emailRaw, 0, 255);
+        $focusArea = mb_substr($focusArea, 0, 200);
+        $therapistCode = mb_substr($therapistCode, 0, 16);
 
         $this->setFlash('auth_old', [
             'full_name' => $fullName,
@@ -86,8 +120,22 @@ final class SecurityController extends AppController
             'therapist_code' => $therapistCode,
         ]);
 
-        if ($fullName === '' || $email === false || strlen($password) < 6 || $therapistCode === '') {
-            $this->setFlash('auth_error', 'Uzupełnij wszystkie pola (hasło min. 6 znaków).');
+        $errors = [];
+        if ($fullName === '' || mb_strlen($fullName) < 2) {
+            $errors[] = 'imię i nazwisko (min. 2 znaki)';
+        }
+        if ($email === false || mb_strlen($emailRaw) > 255) {
+            $errors[] = 'poprawny adres e-mail';
+        }
+        if (strlen($password) < 6 || strlen($password) > 72) {
+            $errors[] = 'hasło (6-72 znaków)';
+        }
+        if ($therapistCode === '') {
+            $errors[] = 'kod terapeuty';
+        }
+
+        if (!empty($errors)) {
+            $this->setFlash('auth_error', 'Uzupełnij: ' . implode(', ', $errors) . '.');
             $this->redirect('/register');
         }
 

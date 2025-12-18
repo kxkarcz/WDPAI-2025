@@ -60,10 +60,13 @@ final class AdminController extends AppController
                 $created = htmlspecialchars($entry['created_at'] ?? '', ENT_QUOTES);
             }
 
-            $usersRows .= '<tr>';
+            $role = htmlspecialchars($entry['role'] ?? '', ENT_QUOTES);
+            $status = htmlspecialchars($entry['status'] ?? '', ENT_QUOTES);
+
+            $usersRows .= '<tr data-role="' . $role . '" data-status="' . $status . '">';
             $usersRows .= '<td>' . htmlspecialchars($entry['full_name'], ENT_QUOTES) . '<br><small>' . htmlspecialchars($entry['email'], ENT_QUOTES) . '</small></td>';
-            $usersRows .= '<td>' . htmlspecialchars($entry['role'], ENT_QUOTES) . '</td>';
-            $usersRows .= '<td>' . htmlspecialchars($entry['status'], ENT_QUOTES) . '</td>';
+            $usersRows .= '<td>' . $role . '</td>';
+            $usersRows .= '<td>' . $status . '</td>';
             $usersRows .= '<td>' . $created . '</td>';
             $usersRows .= '<td class="data-table__actions">';
             $usersRows .= '<form method="post" action="/admin/users/' . (int) $entry['id'] . '/delete" onsubmit="return confirm(\'Czy na pewno usunąć to konto?\');">';
