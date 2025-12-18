@@ -41,15 +41,46 @@ final class PatientController extends AppController
 
         $snapshot = $this->patients->dashboardSnapshot($patientId);
         $badges = $this->badges->listByPatient($patientId);
+        
+        $streaks = $this->habits->streaks($patientId);
+        $currentStreak = 0;
+        foreach ($streaks as $streak) {
+            $currentStreak = max($currentStreak, (int) ($streak['streak_length'] ?? 0));
+        }
+        $snapshot['current_streak'] = $currentStreak;
+
+        $badgeIcons = [
+            'welcome' => '/assets/badges/welcome.svg',
+            'first_mood' => '/assets/badges/first_mood.svg',
+            'streak_7' => '/assets/badges/streak.svg',
+            'streak_21' => '/assets/badges/streak.svg',
+        ];
+        $defaultIcon = '/assets/badges/default.svg';
 
         if (empty($badges)) {
             $badgesHtml = '<div class="badge-grid__empty">Brak odznak jeszcze.</div>';
         } else {
             $badgesHtml = '';
             foreach ($badges as $badge) {
+                $code = $badge->getCode();
                 $label = htmlspecialchars($badge->getLabel(), ENT_QUOTES);
-                $desc = $badge->getDescription() ? '<p>' . htmlspecialchars($badge->getDescription(), ENT_QUOTES) . '</p>' : '';
-                $badgesHtml .= '<div class="badge"><div class="badge__label">' . $label . '</div>' . $desc . '</div>';
+                $desc = $badge->getDescription() ? htmlspecialchars($badge->getDescription(), ENT_QUOTES) : '';
+                $date = $badge->getAwardedAt()->format('d.m.Y');
+                
+                if (str_starts_with($code, 'habit_goal_')) {
+                    $icon = '/assets/badges/habit_goal.svg';
+                } else {
+                    $icon = $badgeIcons[$code] ?? $defaultIcon;
+                }
+                
+                $badgesHtml .= '<div class="badge" tabindex="0">';
+                $badgesHtml .= '<div class="badge__icon"><img src="' . $icon . '" alt="' . $label . '"></div>';
+                $badgesHtml .= '<div class="badge__label">' . $label . '</div>';
+                $badgesHtml .= '<span class="badge__date">' . $date . '</span>';
+                if ($desc) {
+                    $badgesHtml .= '<div class="badge__tooltip">' . $desc . '</div>';
+                }
+                $badgesHtml .= '</div>';
             }
         }
 
