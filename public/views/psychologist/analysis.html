@@ -1,0 +1,139 @@
+<section class="dashboard-grid dashboard-grid--analysis"
+         data-user-id="<?= (int) ($user?->getId() ?? 0) ?>"
+         data-emotion-options='<?= htmlspecialchars($emotionOptionsJson ?? "[]", ENT_QUOTES | ENT_SUBSTITUTE, "UTF-8") ?>'
+         data-patients='<?= htmlspecialchars($patientsJson ?? "[]", ENT_QUOTES | ENT_SUBSTITUTE, "UTF-8") ?>'>
+    
+    <!-- Toolbar -->
+    <section class="analysis-toolbar-card card">
+        <div class="analysis-toolbar">
+            <div class="form-field">
+                <span>Pacjent</span>
+                <div class="searchable-select" id="patient-searchable-select">
+                    <div class="searchable-select__input-wrapper">
+                        <input type="text" class="searchable-select__input" placeholder="Wpisz imię lub wybierz..." autocomplete="off">
+                        <button type="button" class="searchable-select__clear" title="Wyczyść">×</button>
+                        <button type="button" class="searchable-select__toggle" title="Rozwiń listę">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="searchable-select__dropdown"></div>
+                    <select id="patient-selector" class="form-field__input" style="display:none;">
+                        <option value="">-- Wybierz pacjenta --</option>
+                        <?= $patientsOptionsHtml ?? '' ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="timeframe-controls">
+                <div class="timeframe-segment" role="tablist" aria-label="Tryb wykresu">
+                    <button type="button" class="segment-btn active" data-mode="daily">Dzień</button>
+                    <button type="button" class="segment-btn" data-mode="weekly">Tydzień</button>
+                    <button type="button" class="segment-btn" data-mode="monthly">Miesiąc</button>
+                    <button type="button" class="segment-btn" data-mode="yearly">Rok</button>
+                </div>
+            </div>
+
+            <div class="period-navigator">
+                <button type="button" id="chart-prev" class="nav-btn" title="Poprzedni okres">←</button>
+                <input type="text" id="chart-date" class="period-input" placeholder="dd.mm.rrrr" title="Wpisz datę">
+                <button type="button" id="chart-next" class="nav-btn" title="Następny okres">→</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chart -->
+    <section class="card card--chart">
+        <div id="insight-panel" class="chart-container">
+            <div id="chart-placeholder" class="chart-placeholder">
+                <div class="placeholder-icon">📊</div>
+                <p>Wybierz pacjenta z listy powyżej, aby zobaczyć trend emocji</p>
+            </div>
+            <div id="insight-loading" class="chart-loading is-hidden">
+                <div class="spinner"></div>
+                <p>Ładowanie danych...</p>
+            </div>
+            <canvas id="psychologist-mood-chart"></canvas>
+        </div>
+        <div id="insight-legend" class="chart-legend is-hidden">
+            <div class="legend-item"><span class="legend-dot" style="background:#2a9d8f"></span>Nastrój</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f4a261"></span>Intensywność</div>
+            <div class="legend-item"><span class="legend-dot legend-dot--gradient"></span>Dominująca emocja</div>
+        </div>
+    </section>
+
+    <!-- Analysis entries -->
+    <section class="card card--entries">
+        <header class="entries-header">
+            <div>
+                <h2>Wpisy analizy</h2>
+                <p class="entries-subtitle">Notatki i obserwacje dotyczące pacjenta</p>
+            </div>
+            <button type="button" class="button button--primary" id="add-entry-btn" style="display: none;">
+                + Dodaj wpis
+            </button>
+        </header>
+
+        <!-- Entries toolbar - filters and sorting -->
+        <div class="entries-toolbar" id="entries-toolbar" style="display: none;">
+            <div class="entries-filters">
+                <input type="text" id="entries-search" class="entries-search" placeholder="Szukaj w tytule lub treści...">
+                <input type="month" id="entries-month-filter" class="entries-filter" title="Filtruj po miesiącu">
+            </div>
+            <div class="entries-sort">
+                <label>Sortuj:</label>
+                <select id="entries-sort" class="entries-sort-select">
+                    <option value="newest">Najnowsze</option>
+                    <option value="oldest">Najstarsze</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Entry form (hidden by default) -->
+        <form id="analysis-entry-form" class="entry-form" style="display: none;">
+            <input type="hidden" name="patient_user_id" id="form-patient-id" value="">
+            <input type="hidden" name="entry_id" id="entry-id" value="">
+            <div class="entry-form__row">
+                <label class="form-field">
+                    <span>Tytuł</span>
+                    <input type="text" name="title" id="entry-title" required class="form-field__input" placeholder="Krótki tytuł wpisu...">
+                </label>
+                <label class="form-field">
+                    <span>Data</span>
+                    <input type="date" name="entry_date" id="entry-date" required class="form-field__input" value="<?= date('Y-m-d') ?>">
+                </label>
+            </div>
+            <label class="form-field">
+                <span>Treść</span>
+                <textarea name="content" id="entry-content" required class="form-field__input" rows="4" placeholder="Opisz swoje obserwacje..."></textarea>
+            </label>
+            <div class="entry-form__actions">
+                <button type="submit" class="button button--primary" id="form-submit-btn">Zapisz wpis</button>
+                <button type="button" class="button button--ghost" id="cancel-entry-btn">Anuluj</button>
+            </div>
+        </form>
+
+        <!-- Entries list -->
+        <div id="entries-empty" class="entries-empty">
+            <div class="entries-empty__icon">📝</div>
+            <p>Wybierz pacjenta, aby zobaczyć i dodawać wpisy analizy</p>
+        </div>
+        <div id="analysis-entries-list" class="entries-list">
+            <!-- Entries loaded dynamically via JavaScript -->
+        </div>
+        <div id="entries-no-results" class="entries-empty" style="display: none;">
+            <div class="entries-empty__icon">🔍</div>
+            <p>Brak wpisów pasujących do filtrów</p>
+        </div>
+    </section>
+</section>
+
+<script>
+(function(){
+    var root = document.querySelector('.dashboard-grid--analysis');
+    if (!root) { window.__patients = []; window.__emotionOptions = []; return; }
+    try { window.__patients = JSON.parse(root.getAttribute('data-patients') || '[]'); } catch (e) { window.__patients = []; }
+    try { window.__emotionOptions = JSON.parse(root.getAttribute('data-emotion-options') || '[]'); } catch (e) { window.__emotionOptions = []; }
+})();
+</script>

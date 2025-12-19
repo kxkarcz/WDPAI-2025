@@ -1,0 +1,72 @@
+<section class="dashboard-grid dashboard-grid--patient"
+         data-user-id="<?= (int) ($user?->getId() ?? 0) ?>"
+         data-emotion-options="<?= $emotionOptionsAttr ?? '' ?>">
+    
+    <?= $successHtml ?? '' ?>
+    <?= $errorHtml ?? '' ?>
+
+    <section class="card card--form">
+        <header class="card__header">
+            <h2>Dodaj wpis nastroju</h2>
+            <p>Wybierz emocję z koła i określ jej intensywność.</p>
+        </header>
+        <form class="form-grid" id="mood-form" method="post" action="/patient/moods">
+            <input type="hidden" name="emotion_category" value="">
+            <input type="hidden" name="emotion_subcategory" value="">
+            <label class="form-field">
+                <span>Data</span>
+                <input type="date" name="mood_date" value="<?= (new DateTimeImmutable())->format('Y-m-d') ?>">
+            </label>
+            <label class="form-field">
+                <span>Poziom nastroju</span>
+                <input type="number" name="mood_level" min="1" max="5" value="3" required>
+            </label>
+            <div class="form-field form-field--wide">
+                <span>Intensywność</span>
+                <div class="intensity-slider">
+                    <input type="range" name="intensity" min="1" max="10" value="5" id="emotion-intensity">
+                    <span id="emotion-intensity-value">5/10</span>
+                </div>
+            </div>
+            <div class="emotion-wheel-container">
+                <div class="emotion-wheel-wrapper">
+                    <svg class="emotion-wheel-svg" id="emotion-wheel-svg" viewBox="0 0 400 400">
+                        <defs>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </feMerge>
+                        </defs>
+                        <g id="emotion-wheel-segments"></g>
+                        <circle cx="200" cy="200" r="60" class="emotion-wheel-center" id="emotion-wheel-center"/>
+                        <text x="200" y="200" text-anchor="middle" dominant-baseline="middle" class="emotion-wheel-center-text" id="emotion-wheel-center-text">Wybierz</text>
+                    </svg>
+                </div>
+                <div class="emotion-wheel__subcategories is-hidden" id="emotion-subcategories">
+                    <h3 id="emotion-subcategories-title">Rozszerzenie emocji</h3>
+                    <ul id="emotion-subcategories-list"></ul>
+                </div>
+            </div>
+            <label class="form-field form-field--wide">
+                <span>Notatka (opcjonalnie)</span>
+                <textarea name="note" rows="3" placeholder="Jak się dziś czujesz? Co wywołało ten nastrój?"></textarea>
+            </label>
+            <button type="submit" class="button button--primary form-grid__full">Zapisz nastrój</button>
+        </form>
+    </section>
+</section>
+
+<script>
+    (function(){
+        var root = document.querySelector('.dashboard-grid--patient');
+        if (!root) { window.__emotionOptions = window.__emotionOptions || []; return; }
+        try {
+            window.__emotionOptions = JSON.parse(root.getAttribute('data-emotion-options') || '[]');
+        } catch (e) {
+            window.__emotionOptions = [];
+        }
+    })();
+</script>

@@ -1,0 +1,210 @@
+<section class="dashboard-grid dashboard-grid--psychologist"
+         data-user-id="<?= (int) $user->getId() ?>"
+         data-patients='<?= htmlspecialchars($patientsJson ?? '[]', ENT_QUOTES) ?>'
+         data-selected-patient="<?= $selectedPatientUserId ?? '' ?>">
+
+    <section class="card card--full">
+        <header class="card__header">
+            <h2>Chat terapeutyczny</h2>
+            <p>Rozmawiaj z pacjentami i reaguj na bieżąco.</p>
+        </header>
+
+        <div style="margin-bottom: 2rem;">
+            <div class="form-field">
+                <span>Wybierz pacjenta</span>
+                <div class="searchable-select" id="chat-patient-searchable-select">
+                    <div class="searchable-select__input-wrapper">
+                        <input type="text" class="searchable-select__input" placeholder="Wpisz imię lub wybierz..." autocomplete="off">
+                        <button type="button" class="searchable-select__clear" title="Wyczyść">×</button>
+                        <button type="button" class="searchable-select__toggle" title="Rozwiń listę">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="searchable-select__dropdown"></div>
+                    <select id="chat-patient-selector" class="form-field__input" style="display:none;">
+                        <option value="">-- Wybierz pacjenta --</option>
+                        <?= $patientsOptionsHtml ?? '' ?>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card card--chat">
+        <header class="card__header card__header--with-action">
+            <div>
+                <h2>Konwersacja</h2>
+            </div>
+            <button class="button button--ghost" id="psychologist-chat-refresh">Odśwież</button>
+        </header>
+        <div class="chat-window" id="psychologist-chat-window">
+            <div class="chat-window__placeholder" id="psychologist-chat-placeholder">
+                <?= $placeholderHtml ?? '' ?>
+            </div>
+            <div class="chat-window__messages" id="psychologist-chat-messages"></div>
+            <form class="chat-window__composer" id="psychologist-chat-form">
+                <input type="hidden" name="patient_id" id="chat-patient-id" value="<?= htmlspecialchars($chatPatientValue ?? '', ENT_QUOTES) ?>">
+                <div class="composer-input-wrapper">
+                    <textarea name="message" id="chat-message-input" placeholder="Napisz wiadomość..." rows="1" autocomplete="off" <?= $composerDisabledAttr ?? '' ?>></textarea>
+                </div>
+                <button type="submit" class="button button--primary" <?= $sendButtonDisabledAttr ?? '' ?> id="chat-send-button">Wyślij</button>
+            </form>
+        </div>
+    </section>
+</section>
+
+<script>
+// Set window.__patients before searchable-select loads
+(function(){
+    const container = document.querySelector('.dashboard-grid--psychologist');
+    if (container) {
+        try { window.__patients = JSON.parse(container.dataset.patients || '[]'); } catch (e) { window.__patients = []; }
+    } else {
+        window.__patients = [];
+    }
+})();
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.dashboard-grid--psychologist');
+    if (!(container instanceof HTMLElement)) return;
+
+    const userId = Number(container.dataset.userId || '0');
+    const patients = JSON.parse(container.dataset.patients || '[]');
+    const initiallySelected = container.dataset.selectedPatient || '';
+
+    const chatWindow = document.querySelector('#psychologist-chat-window');
+    const chatPlaceholder = document.querySelector('#psychologist-chat-placeholder');
+    const chatMessages = document.querySelector('#psychologist-chat-messages');
+    const chatForm = document.querySelector('#psychologist-chat-form');
+    const chatPatientInput = document.querySelector('#chat-patient-id');
+    const chatMessageInput = document.querySelector('#chat-message-input');
+    const chatSendButton = document.querySelector('#chat-send-button');
+    const chatRefreshButton = document.querySelector('#psychologist-chat-refresh');
+    const patientSelector = document.querySelector('#chat-patient-selector');
+
+    // Auto-resize textarea
+    const autoResizeTextarea = (textarea) => {
+        if (!textarea) return;
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+    };
+
+    if (chatMessageInput) {
+        chatMessageInput.addEventListener('input', () => autoResizeTextarea(chatMessageInput));
+        
+        // Submit on Enter (Shift+Enter for new line)
+        chatMessageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm?.requestSubmit();
+            }
+        });
+    }
+
+    let currentPatientUserId = null;
+    let chatThreadId = null;
+    let lastMessageId = 0;
+    let pollingHandle = null;
+
+    const renderChatMessages = (messages = []) => {
+        if (!chatMessages) return;
+        messages.forEach(message => {
+            const item = document.createElement('div');
+            item.className = 'chat-message';
+            if (message.sender_user_id === userId) item.classList.add('chat-message--mine');
+            const body = document.createElement('p'); body.textContent = message.body;
+            const meta = document.createElement('span'); meta.textContent = new Date(message.created_at).toLocaleString();
+            item.append(body, meta);
+            chatMessages.append(item);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            lastMessageId = Math.max(lastMessageId, message.id);
+        });
+    };
+
+    const fetchChatMessages = async (initial = false) => {
+        if (!currentPatientUserId) return;
+        try {
+            const params = new URLSearchParams({ patient_id: String(currentPatientUserId) });
+            if (!initial && lastMessageId > 0) params.set('after_id', String(lastMessageId));
+            const response = await fetch(`/api/chat/messages?${params.toString()}`, { headers: { 'Accept': 'application/json' } });
+            if (!response.ok) throw new Error('HTTP error');
+            const data = await response.json();
+            if (data.status !== 'ok') return;
+            chatThreadId = data.thread_id;
+            if (initial) { chatMessages.innerHTML = ''; lastMessageId = 0; }
+            renderChatMessages(data.messages ?? []);
+            if (chatPlaceholder) chatPlaceholder.style.display = 'none';
+        } catch (error) {
+            console.warn('Nie udało się pobrać wiadomości.', error);
+        }
+    };
+
+    const startPolling = () => { if (pollingHandle) clearInterval(pollingHandle); pollingHandle = window.setInterval(() => fetchChatMessages(false), 5000); };
+    const stopPolling = () => { if (pollingHandle) { clearInterval(pollingHandle); pollingHandle = null; } };
+
+    const selectPatient = (patientUserId) => {
+        if (!patientUserId) {
+            currentPatientUserId = null;
+            if (chatPatientInput) chatPatientInput.value = '';
+            if (chatMessageInput) chatMessageInput.disabled = true;
+            if (chatSendButton) chatSendButton.disabled = true;
+            if (chatMessages) chatMessages.innerHTML = '';
+            if (chatPlaceholder) { chatPlaceholder.textContent = 'Wybierz pacjenta z listy powyżej, aby otworzyć konwersację.'; chatPlaceholder.style.display = 'block'; }
+            stopPolling();
+            return;
+        }
+
+        currentPatientUserId = Number(patientUserId);
+        if (chatPatientInput) chatPatientInput.value = String(currentPatientUserId);
+        if (chatMessageInput) chatMessageInput.disabled = false;
+        if (chatSendButton) chatSendButton.disabled = false;
+        if (chatMessages) chatMessages.innerHTML = '';
+        if (chatPlaceholder) { chatPlaceholder.textContent = 'Ładowanie wiadomości...'; chatPlaceholder.style.display = 'block'; }
+        lastMessageId = 0;
+        fetchChatMessages(true);
+        startPolling();
+        if (chatWindow) chatWindow.classList.add('is-ready');
+    };
+
+    patientSelector?.addEventListener('change', (event) => {
+        const patientUserId = event.target.value;
+        const url = new URL(window.location);
+        if (patientUserId) url.searchParams.set('patient', patientUserId); else url.searchParams.delete('patient');
+        window.history.pushState({}, '', url);
+        selectPatient(patientUserId);
+    });
+
+    chatForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!currentPatientUserId || !chatMessageInput || chatMessageInput.value.trim() === '') return;
+        const formData = new FormData(chatForm);
+        try {
+            const response = await fetch('/api/chat/messages', { method: 'POST', headers: { 'Accept': 'application/json' }, body: formData });
+            const data = await response.json();
+            if (response.ok && data.message) { 
+                renderChatMessages([data.message]); 
+                if (chatMessageInput) {
+                    chatMessageInput.value = '';
+                    chatMessageInput.style.height = 'auto'; // Reset height
+                }
+            } else { 
+                alert(data.error ?? 'Nie udało się wysłać wiadomości.'); 
+            }
+        } catch (error) { console.warn('Błąd wysyłania wiadomości', error); }
+    });
+
+    chatRefreshButton?.addEventListener('click', (event) => { event.preventDefault(); fetchChatMessages(true); });
+
+    // Initialize if a patient was selected server-side
+    if (initiallySelected) {
+        // reflect the selector UI
+        const opt = patientSelector?.querySelector(`option[value="${initiallySelected}"]`);
+        if (opt) opt.selected = true;
+        selectPatient(initiallySelected);
+    }
+});
+</script>

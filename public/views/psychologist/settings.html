@@ -1,0 +1,71 @@
+<section class="dashboard-grid dashboard-grid--psychologist">
+    <?= $successHtml ?? '' ?>
+    <?= $errorHtml ?? '' ?>
+
+    <section class="card card--invite">
+        <header class="card__header card__header--with-action">
+            <div>
+                <h2>Kod zaproszenia</h2>
+                <p>Przekaż ten kod pacjentowi, aby mógł dołączyć do Twojej opieki.</p>
+            </div>
+            <form method="post" action="/psychologist/settings/regenerate-code">
+                <button type="submit" class="button button--ghost">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
+                        <path d="M23 4v6h-6M1 20v-6h6"/>
+                        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                    </svg>
+                    Wygeneruj nowy
+                </button>
+            </form>
+        </header>
+        <div class="invite-code" id="invite-code" title="Kliknij aby skopiować">
+            <span><?= $inviteCodeEscaped ?? '—' ?></span>
+        </div>
+        <p class="invite-hint">💡 Kliknij kod aby skopiować. Pacjent wpisuje go podczas rejestracji.</p>
+    </section>
+
+    <section class="card">
+        <header class="card__header">
+            <h2>Informacje o koncie</h2>
+        </header>
+        <div class="form-grid">
+            <div class="form-field">
+                <span>Imię i nazwisko</span>
+                <input type="text" value="<?= $userFullName ?? '' ?>" disabled>
+            </div>
+            <div class="form-field">
+                <span>Email</span>
+                <input type="email" value="<?= $userEmail ?? '' ?>" disabled>
+            </div>
+            <div class="form-field">
+                <span>Rola</span>
+                <input type="text" value="Psycholog" disabled>
+            </div>
+        </div>
+    </section>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const inviteCode = document.getElementById('invite-code');
+    if (inviteCode) {
+        inviteCode.addEventListener('click', async () => {
+            const code = inviteCode.textContent.trim();
+            if (code && code !== '—') {
+                try {
+                    await navigator.clipboard.writeText(code);
+                    
+                    // Show feedback
+                    const original = inviteCode.innerHTML;
+                    inviteCode.innerHTML = '<span style="color: var(--color-primary);">✓ Skopiowano!</span>';
+                    setTimeout(() => {
+                        inviteCode.innerHTML = original;
+                    }, 1500);
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                }
+            }
+        });
+    }
+});
+</script>

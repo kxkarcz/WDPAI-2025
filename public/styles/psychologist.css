@@ -1,0 +1,1176 @@
+/* ========================================
+   Analysis Page Styles
+   ======================================== */
+
+.dashboard-grid--analysis {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Toolbar Card */
+.analysis-toolbar-card {
+    padding: 1.25rem 1.5rem;
+}
+
+.analysis-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.analysis-toolbar .form-field {
+    min-width: 220px;
+    margin: 0;
+}
+
+.timeframe-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Segmented control */
+.timeframe-segment {
+    display: inline-flex;
+    border-radius: 12px;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    padding: 4px;
+    gap: 2px;
+}
+
+.segment-btn {
+    background: transparent;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: var(--color-muted);
+    transition: all 0.2s ease;
+}
+
+.segment-btn:hover {
+    color: var(--color-text);
+    background: rgba(42, 157, 143, 0.08);
+}
+
+.segment-btn.active {
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(42, 157, 143, 0.3);
+}
+
+/* Period navigator */
+.period-navigator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.nav-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+}
+
+/* Period input - dynamic based on mode */
+.period-input {
+    min-width: 140px;
+    max-width: 180px;
+    padding: 10px 16px;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.period-input:hover,
+.period-input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.1);
+}
+
+.period-input::placeholder {
+    color: var(--color-muted);
+    font-weight: 400;
+}
+
+/* Chart Card */
+.card--chart {
+    padding: 1.5rem;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-placeholder {
+    text-align: center;
+    padding: 3rem;
+    color: var(--color-muted);
+}
+
+.placeholder-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.chart-placeholder p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.chart-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    z-index: 10;
+}
+
+[data-theme="dark"] .chart-loading {
+    background: rgba(15, 31, 29, 0.9);
+}
+
+.chart-loading.is-hidden {
+    display: none;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.chart-loading p {
+    margin: 0;
+    color: var(--color-muted);
+    font-weight: 500;
+}
+
+#psychologist-mood-chart {
+    width: 100% !important;
+    max-height: 450px;
+}
+
+/* Chart Legend */
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding-top: 1rem;
+    margin-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.chart-legend.is-hidden {
+    display: none;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-dot--gradient {
+    background: linear-gradient(135deg, #2a9d8f, #f4a261);
+}
+
+/* Entries Card */
+.card--entries {
+    padding: 1.5rem;
+}
+
+.entries-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.entries-header h2 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.3rem;
+}
+
+.entries-subtitle {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+}
+
+/* Entries Toolbar */
+.entries-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-background);
+    border-radius: 12px;
+    flex-wrap: wrap;
+}
+
+.entries-filters {
+    display: flex;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 200px;
+}
+
+.entries-search {
+    flex: 1;
+    min-width: 180px;
+    max-width: 300px;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 0.9rem;
+}
+
+.entries-search:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.1);
+}
+
+.entries-filter {
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 0.9rem;
+}
+
+.entries-sort {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.entries-sort label {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    white-space: nowrap;
+}
+
+.entries-sort-select {
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+/* Empty state */
+.entries-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--color-muted);
+}
+
+.entries-empty__icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.6;
+}
+
+.entries-empty p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Entry Form */
+.entry-form {
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.entry-form__row {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.entry-form .form-field {
+    margin-bottom: 1rem;
+}
+
+.entry-form .form-field:last-of-type {
+    margin-bottom: 0;
+}
+
+.entry-form textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.entry-form__actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+/* Entries List */
+.entries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Keep existing psychologist dashboard styles */
+.dashboard-grid--psychologist {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* Invite Card - Settings Page */
+.card--invite {
+    grid-column: 1 / -1;
+    max-width: 600px;
+}
+
+.card--invite .card__header--with-action {
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.card--invite .card__header--with-action > div {
+    flex: 1;
+    min-width: 200px;
+}
+
+.card--invite .invite-code {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    padding: 1.25rem 1.5rem;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(42, 157, 143, 0.1), rgba(42, 157, 143, 0.05));
+    color: var(--color-primary);
+    border: 2px dashed rgba(42, 157, 143, 0.3);
+    font-family: 'Courier New', Consolas, monospace;
+    user-select: all;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.card--invite .invite-code:hover {
+    background: linear-gradient(135deg, rgba(42, 157, 143, 0.15), rgba(42, 157, 143, 0.08));
+    border-color: rgba(42, 157, 143, 0.5);
+}
+
+.card--invite .invite-code span {
+    position: relative;
+}
+
+.invite-hint {
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    margin-top: 0.5rem;
+}
+
+.patient-table {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+}
+
+.patient-table__empty {
+    text-align: center;
+    color: var(--color-muted-500);
+    padding: 1.5rem;
+    border: 1px dashed rgba(42, 157, 143, 0.3);
+    border-radius: 16px;
+}
+
+.patient-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 1.25rem;
+    border-radius: 18px;
+    border: 1px solid rgba(42, 157, 143, 0.15);
+    background: rgba(42, 157, 143, 0.06);
+    box-shadow: 0 12px 32px rgba(42, 157, 143, 0.08);
+}
+
+.patient-row__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    color: var(--color-muted-600);
+}
+
+.patient-row__focus {
+    font-size: 0.85rem;
+    color: var(--color-muted-500);
+}
+
+.patient-row__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+
+.card--patients {
+    /* span full width so patient list fills available space instead of leaving empty right column */
+    grid-column: 1 / -1;
+}
+
+.card--analysis {
+    display: flex;
+    flex-direction: column;
+    grid-column: 2 / 3;
+}
+
+/* allow cards to shrink inside grid cells (fixes Chrome layout clamping) */
+.dashboard-grid--psychologist .card,
+.dashboard-grid--psychologist .card * {
+    min-width: 0;
+}
+
+/* insight panel & canvas should stretch fully in the right column */
+.insight-panel {
+    width: 100%;
+    max-width: none;
+    align-items: stretch;
+    justify-content: center;
+}
+
+.insight-panel canvas {
+    width: 100% !important;
+    height: min(60vh, 720px) !important;
+    max-width: none;
+    display: block !important;
+    box-sizing: border-box;
+}
+
+/* Ensure other main cards live in the right column */
+.dashboard-grid--psychologist .card--chat,
+.dashboard-grid--psychologist .card--quick-actions,
+.dashboard-grid--psychologist .card--full {
+    grid-column: 2 / 3;
+}
+
+/* Make key psychologist cards span the full grid width so analysis/chat use whole screen */
+.dashboard-grid--psychologist .card--analysis,
+.dashboard-grid--psychologist .card--chat,
+.dashboard-grid--psychologist .card--quick-actions,
+.dashboard-grid--psychologist .card--full {
+    grid-column: 1 / -1;
+}
+
+#psychologist-mood-chart {
+    width: 100% !important;
+    height: 520px !important;
+}
+
+.card--chat {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Quick actions: center buttons and ensure no awkward whitespace */
+.card--quick-actions .quick-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    padding-top: 6px;
+}
+
+.card--quick-actions .quick-actions a.button {
+    min-width: 160px;
+}
+
+/* Ensure chat window is full-height inside card */
+#psychologist-chat-window {
+    min-height: 420px;
+}
+
+#psychologist-chat-window {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 320px;
+}
+
+#psychologist-chat-placeholder {
+    text-align: center;
+    color: var(--color-muted-500);
+    padding: 1.5rem;
+}
+
+#psychologist-chat-window.is-ready #psychologist-chat-placeholder {
+    display: none;
+}
+
+#psychologist-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-right: 0.5rem;
+}
+
+/* Chat message - received (from patient) */
+.chat-message {
+    align-self: flex-start;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 18px 18px 18px 4px;
+    padding: 0.85rem 1.15rem;
+    max-width: 75%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    color: var(--color-text);
+}
+
+.chat-message p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Chat message - sent (my message) */
+.chat-message--mine {
+    align-self: flex-end;
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    border-radius: 18px 18px 4px 18px;
+    color: white;
+}
+
+.chat-message--mine p {
+    color: white;
+}
+
+.chat-message span {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.72rem;
+    color: var(--color-muted);
+    opacity: 0.8;
+}
+
+.chat-message--mine span {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .chat-message {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .chat-message--mine {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.chat-window__composer {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.composer-input-wrapper {
+    flex: 1;
+    position: relative;
+}
+
+.chat-window__composer textarea {
+    width: 100%;
+    min-height: 44px;
+    max-height: 150px;
+    padding: 12px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 22px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    resize: none;
+    overflow-y: auto;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.chat-window__composer textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.12);
+}
+
+.chat-window__composer textarea::placeholder {
+    color: var(--color-muted);
+}
+
+.chat-window__composer textarea:disabled {
+    background: var(--color-background);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.chat-window__composer button[type="submit"] {
+    flex-shrink: 0;
+    height: 44px;
+    padding: 0 1.25rem;
+    border-radius: 22px;
+}
+
+/* Legacy support for input */
+.chat-window__composer input[type="text"] {
+    flex: 1;
+}
+
+/* Analysis entries styles */
+.analysis-entry-form {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background: rgba(42, 157, 143, 0.04);
+    border-radius: 16px;
+    border: 1px solid rgba(42, 157, 143, 0.15);
+}
+
+/* Improve form layout: make inputs full-width and textarea larger */
+.analysis-entry-form {
+    max-width: none;
+}
+
+.analysis-entry-form .form-field {
+    width: 100%;
+}
+
+.analysis-entry-form .form-field label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.analysis-entry-form .form-field input[type="text"],
+.analysis-entry-form .form-field input[type="date"],
+.analysis-entry-form .form-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.analysis-entry-form .form-field textarea {
+    min-height: 220px;
+    resize: vertical;
+}
+
+.analysis-entry-form .form-field .form-field__input {
+    width: 100%;
+}
+
+.analysis-entry-form .form-field + .form-field {
+    margin-top: 0.75rem;
+}
+
+.analysis-entries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.analysis-entries-empty {
+    text-align: center;
+    color: var(--color-muted-500);
+    padding: 2rem;
+    border: 1px dashed rgba(42, 157, 143, 0.3);
+    border-radius: 16px;
+    background: rgba(42, 157, 143, 0.04);
+}
+
+.analysis-entry {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 16px;
+    border: 1px solid rgba(42, 157, 143, 0.15);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.analysis-entry:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.analysis-entry__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(42, 157, 143, 0.1);
+}
+
+.analysis-entry__header h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    color: var(--color-primary-700);
+}
+
+.analysis-entry__header time {
+    font-size: 0.85rem;
+    color: var(--color-muted-500);
+}
+
+.analysis-entry__actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.button--small {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+.analysis-entry__content {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+    color: var(--color-muted-700);
+    white-space: pre-wrap;
+}
+
+.analysis-entry__footer {
+    display: flex;
+    gap: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(42, 157, 143, 0.1);
+}
+
+.analysis-entry__footer small {
+    font-size: 0.75rem;
+    color: var(--color-muted-500);
+}
+
+@media (max-width: 768px) {
+    .patient-row {
+        padding: 1rem;
+    }
+
+    .analysis-entry__header {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .analysis-entry__actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* Dark mode adjustments for analysis entries to improve contrast */
+[data-theme="dark"] .analysis-entry {
+    background: rgba(26, 47, 44, 0.6);
+    border: 1px solid rgba(82, 183, 136, 0.12);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    color: var(--color-text);
+}
+
+[data-theme="dark"] .analysis-entry__header h3 {
+    color: var(--color-primary-600);
+}
+
+[data-theme="dark"] .analysis-entry__content {
+    color: var(--color-muted-500);
+}
+
+[data-theme="dark"] .analysis-entry__footer small {
+    color: var(--color-muted-500);
+}
+
+/* Loading overlay for insight panel */
+.insight-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.6);
+    z-index: 5;
+}
+
+.insight-loading.is-hidden {
+    display: none;
+}
+
+.insight-spinner {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 4px solid rgba(0,0,0,0.08);
+    border-top-color: var(--color-primary);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Ensure insight panel is positioned so overlay centers correctly */
+.insight-panel { position: relative; }
+
+/* Segmented control for timeframe */
+.timeframe-segment {
+    display: inline-flex;
+    border-radius: 999px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    padding: 4px;
+}
+.timeframe-segment .segment-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--color-muted);
+}
+.timeframe-segment .segment-btn[aria-selected="true"],
+.timeframe-segment .segment-btn.active {
+    background: var(--color-primary);
+    color: #fff;
+    box-shadow: var(--shadow-soft);
+}
+
+/* Patient info */
+.patient-info {
+    text-align: right;
+    font-size: 0.95rem;
+}
+.patient-info__name { font-weight: 700; color: var(--color-primary-700); }
+.patient-info__email { color: var(--color-muted-500); font-size: 0.9rem; }
+
+/* Legend under chart */
+.insight-legend {
+    display:flex;
+    gap:12px;
+    margin-top:8px;
+    align-items:center;
+    font-size:0.9rem;
+    color:var(--color-muted-500);
+}
+.legend-item { display:flex; gap:8px; align-items:center; }
+.legend-swatch { width:14px; height:14px; border-radius:4px; display:inline-block; }
+.swatch-mood { background: #2a9d8f; }
+.swatch-intensity { background: #f4a261; }
+.swatch-dominant { background: linear-gradient(45deg, rgba(42,157,143,0.9), rgba(244,162,97,0.9)); }
+
+/* Accent for entries: subtle left border */
+.analysis-entry { border-left: 4px solid rgba(42,157,143,0.12); padding-left:1rem; }
+.analysis-entry .analysis-entry__header h3 { font-size:1.15rem; }
+
+/* Entries navigator (prev/next + mode select) */
+.entries-navigator { display:flex; gap:8px; align-items:center; }
+.entries-navigator #entries-period { padding:6px 10px; border-radius:8px; background:var(--color-surface); border:1px solid var(--color-border); }
+.entries-navigator select.form-field__input { padding:6px 10px; border-radius:8px; }
+
+/* Chart navigator (placed in insight header) */
+#chart-navigator { display:flex; gap:8px; align-items:center; }
+#chart-period { padding:6px 10px; border-radius:8px; background:var(--color-surface); border:1px solid var(--color-border); }
+#chart-prev, #chart-next { min-width:40px; padding:6px 8px; }
+
+/* ========================================
+   Searchable Select (Combobox)
+   ======================================== */
+
+.searchable-select {
+    position: relative;
+    min-width: 220px;
+}
+
+.searchable-select__input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.searchable-select__input {
+    width: 100%;
+    padding: 10px 40px 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: text;
+}
+
+.searchable-select__input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.15);
+}
+
+.searchable-select__input::placeholder {
+    color: var(--color-muted);
+}
+
+.searchable-select__toggle {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--color-muted);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.searchable-select__toggle:hover {
+    background: var(--color-background);
+    color: var(--color-text);
+}
+
+.searchable-select__toggle svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s;
+}
+
+.searchable-select.is-open .searchable-select__toggle svg {
+    transform: rotate(180deg);
+}
+
+.searchable-select__clear {
+    position: absolute;
+    right: 36px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-muted);
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 12px;
+    line-height: 1;
+    transition: background-color 0.15s;
+}
+
+.searchable-select__clear:hover {
+    background: var(--color-danger, #e74c3c);
+}
+
+.searchable-select.has-value .searchable-select__clear {
+    display: flex;
+}
+
+.searchable-select__dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 280px;
+    overflow-y: auto;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    z-index: 1000;
+    display: none;
+    padding: 6px;
+}
+
+.searchable-select.is-open .searchable-select__dropdown {
+    display: block;
+    animation: dropdownFadeIn 0.15s ease;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.searchable-select__option {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    transition: background-color 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.searchable-select__option:hover,
+.searchable-select__option.is-focused {
+    background: var(--color-background);
+}
+
+.searchable-select__option.is-selected {
+    background: rgba(42, 157, 143, 0.1);
+    color: var(--color-primary);
+    font-weight: 500;
+}
+
+.searchable-select__option-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary, #f4a261));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.searchable-select__option-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.searchable-select__option-name {
+    font-weight: 500;
+}
+
+.searchable-select__option-email {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.searchable-select__no-results {
+    padding: 16px 12px;
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
+.searchable-select__no-results-icon {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+    opacity: 0.6;
+}
+
+/* Hidden original select */
+.searchable-select select {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+}

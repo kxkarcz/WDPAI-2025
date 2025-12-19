@@ -1,0 +1,257 @@
+<section class="dashboard-grid dashboard-grid--history"
+         data-mood-history="<?= $moodHistoryJson ?? '[]' ?>">
+
+    <!-- Mood Chart - Full Width -->
+    <section class="card card--chart card--full-width">
+        <header class="card__header card__header--with-action">
+            <div>
+                <h2>📈 Trend nastrojów</h2>
+                <p class="card__subtitle">Wizualizacja Twoich emocji w czasie</p>
+            </div>
+            <button class="button button--ghost" id="reload-history">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                </svg>
+                Odśwież
+            </button>
+        </header>
+        <div class="chart-wrapper">
+            <canvas id="mood-chart"></canvas>
+        </div>
+        <div class="chart-legend">
+            <div class="legend-item"><span class="legend-dot" style="background:#2a9d8f"></span>Poziom nastroju</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#f4a261"></span>Intensywność emocji</div>
+        </div>
+    </section>
+
+    <!-- Mood Timeline -->
+    <section class="card card--timeline-enhanced">
+        <header class="card__header">
+            <div class="card__header-icon">😊</div>
+            <div>
+                <h2>Ostatnie wpisy nastrojów</h2>
+                <p class="card__subtitle">Przeglądaj historię swoich emocji</p>
+            </div>
+        </header>
+        <div class="timeline-container">
+            <ul class="timeline-enhanced" id="emotion-timeline">
+                <?php if (empty($moods)): ?>
+                    <li class="timeline-empty">
+                        <div class="timeline-empty__icon">📝</div>
+                        <p>Brak wpisów nastrojów</p>
+                        <a href="/patient/emotions" class="button button--primary button--small">Dodaj pierwszy wpis</a>
+                    </li>
+                <?php else: ?>
+                    <?php foreach ($moods as $mood): ?>
+                    <li class="timeline-item">
+                        <div class="timeline-item__indicator" style="background-color: <?= match($mood->getCategorySlug()) {
+                            'joy' => '#2a9d8f',
+                            'sadness' => '#457b9d',
+                            'fear' => '#264653',
+                            'anger' => '#e76f51',
+                            'disgust' => '#8ab17d',
+                            default => '#6b7a76'
+                        } ?>"></div>
+                        <div class="timeline-item__content">
+                            <div class="timeline-item__header">
+                                <span class="timeline-item__category"><?= htmlspecialchars($mood->getCategoryName()) ?></span>
+                                <?php if ($mood->getSubcategoryName()): ?>
+                                    <span class="timeline-item__subcategory"><?= htmlspecialchars($mood->getSubcategoryName()) ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="timeline-item__meta">
+                                <span class="timeline-item__date"><?= $mood->getDate()->format('d.m.Y') ?></span>
+                                <span class="timeline-item__stats">
+                                    <span title="Poziom nastroju">🎭 <?= $mood->getLevel() ?>/5</span>
+                                    <span title="Intensywność">💪 <?= $mood->getIntensity() ?>/10</span>
+                                </span>
+                            </div>
+                            <?php if ($mood->getNote()): ?>
+                                <p class="timeline-item__note"><?= htmlspecialchars($mood->getNote()) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </li>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Habit History -->
+    <section class="card card--timeline-enhanced">
+        <header class="card__header">
+            <div class="card__header-icon">🌱</div>
+            <div>
+                <h2>Historia nawyków</h2>
+                <p class="card__subtitle">Śledź swoje postępy z mikronawykami</p>
+            </div>
+        </header>
+        <div class="timeline-container">
+            <ul class="timeline-enhanced" id="habit-timeline">
+                <?php if (empty($habitLogs)): ?>
+                    <li class="timeline-empty">
+                        <div class="timeline-empty__icon">🌿</div>
+                        <p>Brak historii nawyków</p>
+                        <a href="/patient/habits" class="button button--primary button--small">Przejdź do nawyków</a>
+                    </li>
+                <?php else: ?>
+                    <?php foreach ($habitLogs as $log): ?>
+                    <li class="timeline-item timeline-item--habit <?= $log['completed'] ? 'timeline-item--completed' : 'timeline-item--missed' ?>">
+                        <div class="timeline-item__indicator">
+                            <?= $log['completed'] ? '✅' : '⏭️' ?>
+                        </div>
+                        <div class="timeline-item__content">
+                            <div class="timeline-item__header">
+                                <span class="timeline-item__category"><?= htmlspecialchars($log['habit_name']) ?></span>
+                                <span class="timeline-item__status <?= $log['completed'] ? 'status--completed' : 'status--missed' ?>">
+                                    <?= $log['completed'] ? 'Wykonano' : 'Pominięto' ?>
+                                </span>
+                            </div>
+                            <div class="timeline-item__meta">
+                                <span class="timeline-item__date"><?= (new DateTimeImmutable($log['log_date']))->format('d.m.Y') ?></span>
+                            </div>
+                            <?php if (!empty($log['note'])): ?>
+                                <p class="timeline-item__note"><?= htmlspecialchars($log['note']) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </li>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </ul>
+        </div>
+    </section>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.dashboard-grid--history');
+    if (!container) return;
+
+    const moodChartCanvas = document.querySelector('#mood-chart');
+    const moodHistoryRaw = container.dataset.moodHistory || '[]';
+    let moodHistory = [];
+    
+    try {
+        moodHistory = JSON.parse(moodHistoryRaw);
+    } catch (e) {
+        console.warn('Failed to parse mood history:', e);
+    }
+
+    if (moodChartCanvas && window.Chart && moodHistory.length > 0) {
+        const labels = moodHistory.map(point => point.date).reverse();
+        const levelDataset = moodHistory.map(point => point.level).reverse();
+        const intensityDataset = moodHistory.map(point => point.intensity).reverse();
+
+        new Chart(moodChartCanvas, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Poziom nastroju',
+                        data: levelDataset,
+                        tension: 0.4,
+                        borderColor: '#2a9d8f',
+                        backgroundColor: 'rgba(42, 157, 143, 0.2)',
+                        fill: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        yAxisID: 'mood',
+                    },
+                    {
+                        label: 'Intensywność emocji',
+                        data: intensityDataset,
+                        tension: 0.4,
+                        borderColor: '#f4a261',
+                        backgroundColor: 'rgba(244, 162, 97, 0.15)',
+                        fill: true,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        yAxisID: 'intensity',
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(18, 48, 43, 0.9)',
+                        titleFont: { size: 14, weight: '600' },
+                        bodyFont: { size: 13 },
+                        padding: 12,
+                        cornerRadius: 8,
+                    },
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false,
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 0,
+                        },
+                    },
+                    mood: {
+                        type: 'linear',
+                        position: 'left',
+                        beginAtZero: true,
+                        min: 0,
+                        max: 5,
+                        title: {
+                            display: true,
+                            text: 'Nastrój (1-5)',
+                            font: { weight: '600' },
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.06)',
+                        },
+                    },
+                    intensity: {
+                        type: 'linear',
+                        position: 'right',
+                        beginAtZero: true,
+                        min: 0,
+                        max: 10,
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        title: {
+                            display: true,
+                            text: 'Intensywność (1-10)',
+                            font: { weight: '600' },
+                        },
+                    },
+                },
+            },
+        });
+    } else if (moodChartCanvas && moodHistory.length === 0) {
+        // Show empty state for chart
+        const wrapper = moodChartCanvas.parentElement;
+        if (wrapper) {
+            wrapper.innerHTML = `
+                <div class="chart-empty">
+                    <div class="chart-empty__icon">📊</div>
+                    <p>Brak danych do wyświetlenia</p>
+                    <a href="/patient/emotions" class="button button--primary button--small">Dodaj pierwszy wpis</a>
+                </div>
+            `;
+        }
+    }
+
+    // Refresh button
+    const refreshBtn = document.querySelector('#reload-history');
+    refreshBtn?.addEventListener('click', () => {
+        window.location.reload();
+    });
+});
+</script>

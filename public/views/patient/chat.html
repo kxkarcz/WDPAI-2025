@@ -1,0 +1,184 @@
+<section class="dashboard-grid dashboard-grid--patient dashboard-grid--chat-fullscreen"
+         data-user-id="<?= (int) $user->getId() ?>"
+         data-psychologist-id="<?= (int) ($psychologist['psychologist_user_id'] ?? 0) ?>"
+         data-thread-id="<?= (int) ($chatThreadId ?? 0) ?>">
+
+    <?php if (!empty($psychologist)): ?>
+    <section class="card card--chat card--chat-fullscreen">
+        <header class="card__header card__header--with-action">
+            <div class="chat-header-info">
+                <h2>Chat z psychologiem</h2>
+                <p class="chat-header-subtitle">Rozmawiasz z: <strong><?= htmlspecialchars($psychologist['psychologist_name'] ?? 'Twój psycholog') ?></strong></p>
+            </div>
+            <button class="button button--ghost" id="patient-chat-refresh">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                </svg>
+                Odśwież
+            </button>
+        </header>
+        <div class="chat-window chat-window--fullscreen" id="patient-chat-window">
+            <div class="chat-window__placeholder" id="patient-chat-placeholder">
+                Ładowanie wiadomości...
+            </div>
+            <div class="chat-window__messages" id="patient-chat-messages"></div>
+            <form class="chat-window__composer" id="patient-chat-form">
+                <div class="composer-input-wrapper">
+                    <textarea name="message" id="chat-message-input" placeholder="Napisz wiadomość do psychologa..." rows="1" autocomplete="off"></textarea>
+                </div>
+                <button type="submit" class="button button--primary" id="chat-send-button">Wyślij</button>
+            </form>
+        </div>
+    </section>
+    <?php else: ?>
+    <section class="card card--full">
+        <div class="empty-state">
+            <div class="empty-state__icon">💬</div>
+            <h3>Brak przypisanego psychologa</h3>
+            <p>Aby rozpocząć rozmowę, poproś psychologa o kod zaproszenia i wprowadź go podczas rejestracji lub skontaktuj się z administratorem.</p>
+        </div>
+    </section>
+    <?php endif; ?>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.querySelector('.dashboard-grid--patient');
+    if (!(container instanceof HTMLElement)) return;
+
+    const userId = Number(container.dataset.userId || '0');
+    const psychologistId = Number(container.dataset.psychologistId || '0');
+    const initialThreadId = Number(container.dataset.threadId || '0');
+
+    if (!psychologistId) return; // No psychologist assigned
+
+    const chatWindow = document.querySelector('#patient-chat-window');
+    const chatPlaceholder = document.querySelector('#patient-chat-placeholder');
+    const chatMessages = document.querySelector('#patient-chat-messages');
+    const chatForm = document.querySelector('#patient-chat-form');
+    const chatMessageInput = document.querySelector('#chat-message-input');
+    const chatSendButton = document.querySelector('#chat-send-button');
+    const chatRefreshButton = document.querySelector('#patient-chat-refresh');
+
+    let chatThreadId = initialThreadId;
+    let lastMessageId = 0;
+    let pollingHandle = null;
+
+    // Auto-resize textarea
+    const autoResizeTextarea = (textarea) => {
+        if (!textarea) return;
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+    };
+
+    if (chatMessageInput) {
+        chatMessageInput.addEventListener('input', () => autoResizeTextarea(chatMessageInput));
+        
+        // Submit on Enter (Shift+Enter for new line)
+        chatMessageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm?.requestSubmit();
+            }
+        });
+    }
+
+    const renderChatMessages = (messages = []) => {
+        if (!chatMessages) return;
+        messages.forEach(message => {
+            const item = document.createElement('div');
+            item.className = 'chat-message';
+            if (message.sender_user_id === userId) item.classList.add('chat-message--mine');
+            const body = document.createElement('p'); 
+            body.textContent = message.body;
+            const meta = document.createElement('span'); 
+            meta.textContent = new Date(message.created_at).toLocaleString('pl-PL');
+            item.append(body, meta);
+            chatMessages.append(item);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            lastMessageId = Math.max(lastMessageId, message.id);
+        });
+    };
+
+    const fetchChatMessages = async (initial = false) => {
+        try {
+            const params = new URLSearchParams();
+            if (!initial && lastMessageId > 0) params.set('after_id', String(lastMessageId));
+            
+            const queryString = params.toString();
+            const url = queryString ? `/api/chat/messages?${queryString}` : '/api/chat/messages';
+            
+            const response = await fetch(url, { 
+                headers: { 'Accept': 'application/json' } 
+            });
+            
+            if (!response.ok) throw new Error('HTTP error');
+            const data = await response.json();
+            
+            if (data.status !== 'ok') return;
+            
+            chatThreadId = data.thread_id || chatThreadId;
+            
+            if (initial) { 
+                if (chatMessages) chatMessages.innerHTML = ''; 
+                lastMessageId = 0; 
+            }
+            
+            renderChatMessages(data.messages ?? []);
+            
+            if (chatPlaceholder) chatPlaceholder.style.display = 'none';
+            if (chatWindow) chatWindow.classList.add('is-ready');
+            
+        } catch (error) {
+            console.warn('Nie udało się pobrać wiadomości.', error);
+            if (chatPlaceholder) {
+                chatPlaceholder.textContent = 'Nie udało się załadować wiadomości. Spróbuj odświeżyć.';
+            }
+        }
+    };
+
+    const startPolling = () => { 
+        if (pollingHandle) clearInterval(pollingHandle); 
+        pollingHandle = window.setInterval(() => fetchChatMessages(false), 5000); 
+    };
+
+    chatForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!chatMessageInput || chatMessageInput.value.trim() === '') return;
+        
+        const formData = new FormData();
+        formData.append('message', chatMessageInput.value.trim());
+        
+        try {
+            const response = await fetch('/api/chat/messages', { 
+                method: 'POST', 
+                headers: { 'Accept': 'application/json' }, 
+                body: formData 
+            });
+            const data = await response.json();
+            
+            if (response.ok && data.message) { 
+                renderChatMessages([data.message]); 
+                if (chatMessageInput) {
+                    chatMessageInput.value = '';
+                    chatMessageInput.style.height = 'auto';
+                }
+            } else { 
+                alert(data.error ?? 'Nie udało się wysłać wiadomości.'); 
+            }
+        } catch (error) { 
+            console.warn('Błąd wysyłania wiadomości', error); 
+        }
+    });
+
+    chatRefreshButton?.addEventListener('click', (event) => { 
+        event.preventDefault(); 
+        fetchChatMessages(true); 
+    });
+
+    // Initialize
+    fetchChatMessages(true);
+    startPolling();
+});
+</script>
