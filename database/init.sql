@@ -157,14 +157,42 @@ CREATE OR REPLACE VIEW v_patient_mood_summary AS
 SELECT
     p.id AS patient_id,
     u.full_name,
-    COUNT(m.id)                             AS entries,
-    ROUND(AVG(m.mood_level)::numeric, 2)    AS average_level,
-    ROUND(AVG(m.intensity)::numeric, 2)     AS average_intensity,
-    MAX(m.mood_date)                        AS last_entry
+    COUNT(DISTINCT m.id)                             AS entries,
+    ROUND(AVG(m.mood_level)::numeric, 2)            AS average_mood,
+    ROUND(AVG(m.intensity)::numeric, 2)              AS average_intensity,
+    MAX(m.mood_date)                                 AS last_entry_date,
+    COALESCE(habit_stats.active_habits, 0)          AS active_habits,
+    COALESCE(habit_stats.completed_habits, 0)       AS completed_habits,
+    COALESCE(badge_stats.total_badges, 0)           AS total_badges
 FROM patients p
 JOIN users u ON u.id = p.user_id
 LEFT JOIN moods m ON m.patient_id = p.id
-GROUP BY p.id, u.full_name;
+LEFT JOIN (
+    SELECT 
+        h.patient_id,
+        COUNT(DISTINCT h.id) AS active_habits,
+        COUNT(DISTINCT CASE 
+            WHEN COALESCE(hl_stats.completed_count, 0) >= h.frequency_goal 
+            THEN h.id 
+        END) AS completed_habits
+    FROM habits h
+    LEFT JOIN (
+        SELECT 
+            hl.habit_id,
+            COUNT(*) FILTER (WHERE hl.completed = TRUE AND hl.log_date >= CURRENT_DATE - INTERVAL '14 days') AS completed_count
+        FROM habit_logs hl
+        GROUP BY hl.habit_id
+    ) hl_stats ON hl_stats.habit_id = h.id
+    GROUP BY h.patient_id
+) habit_stats ON habit_stats.patient_id = p.id
+LEFT JOIN (
+    SELECT 
+        patient_id,
+        COUNT(*) AS total_badges
+    FROM badges
+    GROUP BY patient_id
+) badge_stats ON badge_stats.patient_id = p.id
+GROUP BY p.id, u.full_name, habit_stats.active_habits, habit_stats.completed_habits, badge_stats.total_badges;
 
 CREATE OR REPLACE VIEW v_psychologist_patient_overview AS
 SELECT
@@ -309,12 +337,17 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    existing_count INTEGER;
+    has_existing BOOLEAN;
 BEGIN
-    SELECT COUNT(*) INTO existing_count FROM moods WHERE patient_id = NEW.patient_id;
-    IF existing_count = 1 THEN
+    -- Sprawdź czy istnieją już wpisy dla tego pacjenta PRZED wstawieniem
+    SELECT EXISTS(
+        SELECT 1 FROM moods WHERE patient_id = NEW.patient_id
+    ) INTO has_existing;
+    
+    -- Jeśli nie ma jeszcze żadnych wpisów, przyznaj odznakę
+    IF NOT has_existing THEN
         INSERT INTO badges (patient_id, code, label, description)
-        VALUES (NEW.patient_id, 'first_mood', 'Pierwszy wpis nastroju', 'Dziękujemy za pierwszy wpis nastroju!')
+        VALUES (NEW.patient_id, 'first_mood', 'Pierwszy wpis nastroju', E'Dzi\u0119kujemy za pierwszy wpis nastroju!')
         ON CONFLICT (patient_id, code) DO NOTHING;
     END IF;
     RETURN NEW;
@@ -323,7 +356,7 @@ $$;
 
 DROP TRIGGER IF EXISTS tg_award_first_mood ON moods;
 CREATE TRIGGER tg_award_first_mood
-AFTER INSERT ON moods
+BEFORE INSERT ON moods
 FOR EACH ROW
 EXECUTE FUNCTION award_first_mood_badge();
 
