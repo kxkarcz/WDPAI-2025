@@ -48,6 +48,7 @@ final class AuthServiceTest extends TestCase
     public function testCheckReturnsTrueWhenLoggedIn(): void
     {
         $_SESSION['user_id'] = 1;
+        $_SESSION['user_role'] = 'patient';
         
         // Odtworzenie serwisu z nową sesją
         $authService = new AuthService();
