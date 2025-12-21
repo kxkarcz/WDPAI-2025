@@ -6,3 +6,13 @@
 .card--tree img {
     max-width: 220px;
 }
+
+@media (max-width: 768px) {
+    .card--chart canvas {
+        max-height: 200px;
+    }
+
+    .card--tree img {
+        max-width: 180px;
+    }
+}

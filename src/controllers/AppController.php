@@ -83,7 +83,10 @@ class AppController
                     return str_starts_with($currentPath, $path) ? 'active' : '';
                 };
 
-                $navHtml .= '<nav class="app-nav">';
+                $navHtml .= '<button class="app-nav__toggle" aria-label="Menu" aria-expanded="false" data-nav-toggle>';
+                    $navHtml .= '<span class="app-nav__toggle-icon"></span>';
+                $navHtml .= '</button>';
+                $navHtml .= '<nav class="app-nav" data-nav-menu>';
                 if ($role === User::ROLE_PATIENT) {
                     $navHtml .= '<a class="app-nav__item ' . $isActive('/patient/dashboard') . '" href="/patient/dashboard">Dashboard</a>';
                     $navHtml .= '<a class="app-nav__item ' . $isActive('/patient/emotions') . '" href="/patient/emotions">Emocje</a>';

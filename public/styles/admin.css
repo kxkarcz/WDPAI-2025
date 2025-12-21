@@ -183,5 +183,73 @@
     .user-filters__info {
         justify-content: center;
     }
+
+    .data-table {
+        font-size: 0.9rem;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .data-table__actions {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .data-table__actions button {
+        width: 100%;
+        font-size: 0.85rem;
+        padding: 0.4rem 0.6rem;
+    }
+
+    .role-fields {
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .data-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .data-table thead {
+        display: none;
+    }
+
+    .data-table tbody {
+        display: block;
+    }
+
+    .data-table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        padding: 0.75rem;
+        background: var(--color-surface);
+    }
+
+    .data-table td {
+        display: block;
+        text-align: right;
+        padding: 0.5rem 0;
+        border: none;
+    }
+
+    .data-table td::before {
+        content: attr(data-label);
+        float: left;
+        font-weight: 600;
+        color: var(--color-muted);
+    }
+
+    .data-table__actions {
+        justify-content: flex-end;
+        margin-top: 0.5rem;
+    }
 }
 

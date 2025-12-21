@@ -88,3 +88,48 @@ body.auth-body {
     opacity: 0.8;
 }
 
+@media (max-width: 768px) {
+    .auth-container {
+        width: 95vw;
+        padding: 0 1rem;
+    }
+
+    .auth-card {
+        padding: 1.5rem;
+        border-radius: 20px;
+    }
+
+    .auth-card__header h1 {
+        font-size: 1.5rem;
+    }
+
+    .auth-card__logo {
+        width: 48px;
+    }
+
+    .auth-header {
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+
+    .auth-form__info-badge {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.875rem;
+    }
+
+    .info-badge__icon {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 1.25rem;
+        border-radius: 16px;
+    }
+
+    .auth-card__header h1 {
+        font-size: 1.3rem;
+    }
+}

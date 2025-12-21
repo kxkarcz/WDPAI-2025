@@ -16,9 +16,51 @@ final class PsychologistRepository
 
     public function assignedPatients(int $psychologistUserId): array
     {
-        $sql = 'SELECT * FROM v_psychologist_patient_overview WHERE psychologist_id = (
-            SELECT id FROM psychologists WHERE user_id = :user_id
-        )';
+        $sql = <<<SQL
+            SELECT 
+                p.id AS patient_id,
+                p.user_id AS patient_user_id,
+                u.full_name,
+                u.email,
+                p.focus_area,
+                ROUND(AVG(m.mood_level)::numeric, 2) AS avg_level,
+                ROUND(AVG(m.intensity)::numeric, 2) AS avg_intensity,
+                (
+                    SELECT ec.name
+                    FROM moods m2
+                    JOIN emotion_categories ec ON ec.id = m2.emotion_category_id
+                    WHERE m2.patient_id = p.id
+                    ORDER BY m2.mood_date DESC, m2.created_at DESC
+                    LIMIT 1
+                ) AS last_emotion_category,
+                (
+                    SELECT es.name
+                    FROM moods m3
+                    JOIN emotion_subcategories es ON es.id = m3.emotion_subcategory_id
+                    WHERE m3.patient_id = p.id
+                      AND m3.emotion_subcategory_id IS NOT NULL
+                    ORDER BY m3.mood_date DESC, m3.created_at DESC
+                    LIMIT 1
+                ) AS last_emotion_subcategory,
+                (
+                    SELECT ROUND(
+                        (COUNT(*) FILTER (WHERE hl.completed = TRUE AND hl.log_date >= CURRENT_DATE - INTERVAL '7 days')::numeric / 
+                         NULLIF(COUNT(DISTINCT hl.log_date) FILTER (WHERE hl.log_date >= CURRENT_DATE - INTERVAL '7 days'), 0)) * 100, 
+                        0
+                    )
+                    FROM habits h
+                    LEFT JOIN habit_logs hl ON hl.habit_id = h.id
+                    WHERE h.patient_id = p.id
+                ) AS weekly_completion
+            FROM patient_psychologist pp
+            JOIN patients p ON p.id = pp.patient_id
+            JOIN users u ON u.id = p.user_id
+            JOIN psychologists psy ON psy.id = pp.psychologist_id
+            LEFT JOIN moods m ON m.patient_id = p.id
+            WHERE psy.user_id = :user_id
+            GROUP BY p.id, p.user_id, u.full_name, u.email, p.focus_area
+            ORDER BY u.full_name
+        SQL;
         $statement = $this->db->prepare($sql);
         $statement->execute(['user_id' => $psychologistUserId]);
         return $statement->fetchAll() ?: [];

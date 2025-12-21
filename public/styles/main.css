@@ -304,6 +304,61 @@ img {
     color: var(--color-primary);
 }
 
+.app-nav__toggle {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    z-index: 20;
+}
+
+.app-nav__toggle-icon {
+    display: block;
+    width: 24px;
+    height: 3px;
+    background: var(--color-text);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.app-nav__toggle-icon::before,
+.app-nav__toggle-icon::after {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 3px;
+    background: var(--color-text);
+    border-radius: 2px;
+    position: absolute;
+    transition: all 0.3s ease;
+}
+
+.app-nav__toggle-icon::before {
+    top: -8px;
+}
+
+.app-nav__toggle-icon::after {
+    bottom: -8px;
+}
+
+.app-nav__toggle[aria-expanded="true"] .app-nav__toggle-icon {
+    background: transparent;
+}
+
+.app-nav__toggle[aria-expanded="true"] .app-nav__toggle-icon::before {
+    top: 0;
+    transform: rotate(45deg);
+}
+
+.app-nav__toggle[aria-expanded="true"] .app-nav__toggle-icon::after {
+    bottom: 0;
+    transform: rotate(-45deg);
+}
+
 .app-header__actions {
     display: flex;
     align-items: center;
@@ -480,9 +535,77 @@ img {
 
 @media (max-width: 768px) {
     .app-header {
-        flex-direction: column;
+        flex-wrap: wrap;
+        padding: 1rem 1.5rem;
         gap: 1rem;
-        align-items: flex-start;
+        position: relative;
+    }
+
+    .app-header__brand {
+        font-size: 1.1rem;
+    }
+
+    .app-header__logo {
+        width: 28px;
+        height: 28px;
+    }
+
+    .app-nav__toggle {
+        display: flex;
+        order: 2;
+        margin-left: auto;
+    }
+
+    .app-nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        gap: 0;
+        background: var(--color-surface);
+        border-top: 1px solid var(--color-border);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1rem 0;
+        z-index: 15;
+    }
+
+    .app-nav[data-nav-menu-open] {
+        display: flex;
+    }
+
+    .app-nav__item {
+        padding: 0.75rem 1.5rem;
+        border-bottom: 1px solid var(--color-border);
+        width: 100%;
+    }
+
+    .app-nav__item:last-child {
+        border-bottom: none;
+    }
+
+    .app-header__actions {
+        order: 3;
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .app-header__user {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .app-header__user span {
+        font-size: 0.9rem;
+    }
+
+    .app-header__user .button {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
     }
 
     .app-main {
