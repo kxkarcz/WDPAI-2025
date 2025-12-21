@@ -1,0 +1,98 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 OPR/124.0.0.0" compressed="false" version="29.2.7">
+  <diagram id="J7WmcjxbzPTJ7rql9eU2" name="Architecture">
+    <mxGraphModel dx="2536" dy="1611" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" background="#f7fdfb" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="docker" parent="1" style="shape=swimlane;startSize=40;swimlaneLine=0;swimlaneLineColor=#2A9D8F;swimlaneFillColor=#2A9D8F;fillColor=#ffffff;strokeColor=#2A9D8F;fontColor=light-dark(#FFFFFF,#FFFFFF);fontStyle=1;rounded=1;fontSize=20;verticalAlign=top;" value="Docker Compose Environment" vertex="1">
+          <mxGeometry height="1100" width="1600" x="60" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="network" parent="docker" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=none;fontColor=#12302b;fontSize=11;dashed=1;opacity=50;" value="mindgarden-network (bridge)" vertex="1">
+          <mxGeometry height="1060" width="1440" x="20" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="MIi9Vsr8QbXr4GMsG1nW-3" edge="1" parent="docker" source="nginx" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=7;endSize=6;" target="php">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="300" y="550" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="nginx" parent="docker" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=#ffffff;fontColor=#12302b;fontSize=12;" value="nginx (Reverse Proxy)&#xa;• Port: 8080:80&#xa;• Serves /public assets&#xa;• FastCGI proxy → php:9000&#xa;• Static file serving" vertex="1">
+          <mxGeometry height="140" width="280" x="40" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="php" parent="docker" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=#ffffff;fontColor=#12302b;fontSize=14;fontStyle=1;verticalAlign=top;" value="php-fpm (MindGarden Application)" vertex="1">
+          <mxGeometry height="900" width="800" x="360" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="public" parent="php" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=#ffffff;fontColor=#12302b;fontSize=11;" value="public/ (Views + Assets)&#xa;• views/ (HTML templates)&#xa;  - auth/, patient/, psychologist/, admin/&#xa;  - layout.html, dashboard.html&#xa;• styles/ (CSS)&#xa;  - main.css, dashboard.css, patient.css&#xa;  - Dark mode support&#xa;• scripts/ (JavaScript)&#xa;  - AJAX, Chart.js integration&#xa;  - Theme toggle, searchable select" vertex="1">
+          <mxGeometry height="180" width="360" x="20" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="core" parent="php" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=#ffffff;fontColor=#12302b;fontSize=11;" value="Core Components&#xa;• Database (PDO connection)&#xa;• Autoloader (PSR-4)&#xa;• Env (environment variables)&#xa;• Routing (route registration)" vertex="1">
+          <mxGeometry height="180" width="360" x="420" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="mvc_layer" parent="php" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=#E9F5F1;fontColor=#12302b;fontStyle=1;fontSize=13;verticalAlign=top;" value="MVC Application Layer" vertex="1">
+          <mxGeometry height="380" width="760" x="20" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="controllers" parent="mvc_layer" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=#ffffff;fontColor=#12302b;fontSize=11;" value="Controllers&#xa;• SecurityController (login/register)&#xa;• DashboardController (routing)&#xa;• PatientController (moods, habits, chat)&#xa;• PsychologistController (analysis, export)&#xa;• AdminController (user management)&#xa;• ApiController (AJAX endpoints)&#xa;• SettingsController (theme toggle)" vertex="1">
+          <mxGeometry height="160" width="340" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="models" parent="mvc_layer" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=#ffffff;fontColor=#12302b;fontSize=11;" value="Models (Domain Entities)&#xa;• User, PatientProfile, PsychologistProfile&#xa;• MoodEntry, EmotionCategory, EmotionSubcategory&#xa;• Habit, HabitLog&#xa;• Badge, ChatThread, ChatMessage&#xa;• AnalysisEntry" vertex="1">
+          <mxGeometry height="160" width="340" x="400" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="repositories" parent="mvc_layer" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=#ffffff;fontColor=#12302b;fontSize=11;" value="Repositories (Data Access)&#xa;• UserRepository&#xa;• PatientRepository&#xa;• PsychologistRepository&#xa;• MoodRepository&#xa;• HabitRepository, BadgeRepository&#xa;• EmotionRepository&#xa;• ChatRepository&#xa;• AnalysisRepository" vertex="1">
+          <mxGeometry height="140" width="340" x="20" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="services" parent="mvc_layer" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=#ffffff;fontColor=#12302b;fontSize=11;" value="Services&#xa;• AuthService&#xa;  - Authentication&#xa;  - Authorization (role-based)&#xa;  - Session management" vertex="1">
+          <mxGeometry height="140" width="340" x="400" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_controllers_repositories" edge="1" parent="mvc_layer" source="controllers" style="strokeColor=#2A9D8F;strokeWidth=1;endArrow=block;endFill=1;dashed=1;" target="repositories">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="php_info" parent="php" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=#E9F5F1;fontColor=#12302b;fontSize=11;" value="PHP 8.3 FPM Alpine&#xa;• index.php + Routing.php&#xa;• CSV Export&#xa;• AJAX API Endpoints" vertex="1">
+          <mxGeometry height="100" width="360" x="20" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="MIi9Vsr8QbXr4GMsG1nW-5" edge="1" parent="docker" source="postgres" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=7;endArrow=none;endFill=0;startArrow=classic;startFill=1;" target="php">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="MIi9Vsr8QbXr4GMsG1nW-6" edge="1" parent="docker" source="postgres" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=7;" target="pgadmin">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="postgres" parent="docker" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=#ffffff;fontColor=#12302b;fontSize=12;" value="PostgreSQL Database&#xa;• Port: 5433:5432&#xa;• Database: mindgarden&#xa;• init.sql (schema + seed)&#xa;• Views, Functions, Triggers&#xa;• 3NF Normalization&#xa;• 14 tables" vertex="1">
+          <mxGeometry height="200" width="300" x="1260" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="pgadmin" parent="docker" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=#ffffff;fontColor=#12302b;fontSize=12;" value="pgAdmin 4 (Monitoring)&#xa;• Port: 5050:80&#xa;• Database administration&#xa;• Query interface&#xa;• Schema inspection" vertex="1">
+          <mxGeometry height="140" width="300" x="1260" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_nginx_php" edge="1" parent="docker" source="nginx" style="strokeColor=#2A9D8F;strokeWidth=2;endArrow=block;endFill=1;" target="php">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="320" y="170" as="sourcePoint" />
+            <mxPoint x="360" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_php_postgres" edge="1" parent="docker" source="php" style="strokeColor=#2A9D8F;strokeWidth=2;endArrow=block;endFill=1;" target="postgres">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1160" y="200" as="sourcePoint" />
+            <mxPoint x="1200" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge_pgadmin_postgres" edge="1" parent="docker" source="pgadmin" style="strokeColor=#2A9D8F;strokeWidth=2;endArrow=block;endFill=1;" target="postgres">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1350" y="340" as="sourcePoint" />
+            <mxPoint x="1350" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MIi9Vsr8QbXr4GMsG1nW-2" edge="1" parent="1" source="client" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeWidth=7;" target="nginx">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="client" parent="1" style="shape=rectangle;rounded=1;strokeColor=#2A9D8F;fillColor=#E9F5F1;fontColor=#12302b;fontSize=12;fontStyle=1;" value="Client Browser&#xa;HTTP/HTTPS Requests&#xa;AJAX Calls" vertex="1">
+          <mxGeometry height="80" width="200" x="60" y="1180" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_client_nginx" edge="1" parent="1" source="client" style="strokeColor=#2A9D8F;strokeWidth=2;endArrow=block;endFill=1;" target="nginx">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="160" y="1180" as="sourcePoint" />
+            <mxPoint x="160" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
